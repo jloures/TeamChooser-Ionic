@@ -1,6 +1,6 @@
 angular.module('ionicApp', ['ionic'])
 
-.controller('AppCtrl', function($scope, $ionicPopup, $timeout, $ionicModal) {
+.controller('AppCtrl', function($scope, $ionicPopup, $ionicModal) {
   
   $scope.games = [];
   $scope.numberOfgames = 0;
@@ -12,10 +12,9 @@ angular.module('ionicApp', ['ionic'])
   });
   
   $scope.createGame = function(game) {
-    console.log(game)
-    var newGame = Object.assign({}, game);
-    //do error checking here
-    if( game.gameName.trim() === "" ) {
+    var newInstance = Object.assign({}, game);
+    //this is error checking
+    if( newInstance.gameName === undefined || newInstance.gameName.trim() === "" ) {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Game Name has to be valid!'
@@ -23,7 +22,7 @@ angular.module('ionicApp', ['ionic'])
       return;
     }
 
-    if( game.teamA.trim() === "") {
+    if( newInstance.teamA === undefined || newInstance.teamA.trim() === "") {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Team A name has to be valid!'
@@ -31,7 +30,7 @@ angular.module('ionicApp', ['ionic'])
       return;
     }
 
-    if( game.teamB.trim() === "") {
+    if( newInstance.teamB === undefined || newInstance.teamB.trim() === "") {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Team B name has to be valid!'
@@ -39,7 +38,7 @@ angular.module('ionicApp', ['ionic'])
       return;
     }
 
-    if( game.teamA === game.teamB ) {
+    if( newInstance.teamA === game.teamB ) {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Two teams cannot have the same name!'
@@ -47,8 +46,8 @@ angular.module('ionicApp', ['ionic'])
       return;
     }
 
-    newGame.gameId = $scope.numberOfgames++;
-    $scope.games.push(newGame);
+    newInstance.gameId = $scope.numberOfgames++;
+    $scope.games.push(newInstance);
     $scope.modal.hide();
     //set all properties to default
     game.gameName = "";
