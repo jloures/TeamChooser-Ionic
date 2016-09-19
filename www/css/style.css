@@ -1,1 +1,33 @@
-@import url("gamelist.css");
+.instructions {
+    height: 100%;
+}
+
+.popover-height {
+    height: 110px !important;
+}
+
+.last-player-added {
+    font-size: 18px;
+    color: green;
+    padding: 10px 0px 10px 0px;
+    text-align: center;
+}
+
+.player-attribute-players-list {
+    font-size: 14px;
+}
+
+.player-item-preassigned-team {
+    display: inline;
+}
+
+div.player-selected-mark {
+    float: right;
+    font-size: 35px;
+    position: relative;
+    right: -35px;
+}
+
+.player-item-players-list {
+    float: left;
+}

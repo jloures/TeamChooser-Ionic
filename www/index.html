@@ -2,20 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <title></title>
-
     <link rel="manifest" href="manifest.json">
-
-    <!-- un-comment this code to enable service worker
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(() => console.log('service worker installed'))
-          .catch(err => console.log('Error', err));
-      }
-    </script>-->
-
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <script src="lib/ionic/js/ionic.bundle.js"></script>
@@ -25,45 +14,216 @@
 
   <body ng-app="ionicApp" ng-controller="AppCtrl">
     <ion-header-bar align-title="center" class="bar-positive">
+      <div class="buttons">
+        <button class="button button-icon ion-information-circled" ng-click="instructions.show()"/>
+      </div>
       <h1 class="title">Game List</h1>
       <div class="buttons">
-        <button class="button button-icon ion-information-circled" ng-click=""/>
-        <button class="button button-icon ion-compose" ng-click="modal.show()"/>
+        <button class="button button-icon ion-compose" ng-click="createoreditgame.show()"/>
       </div>
     </ion-header-bar>
     <ion-content>
-      <ion-list>
-        <ion-item ng-repeat="game in games">
+      <ion-list>          
+        <ion-item ng-click="openPlayersList(game)" ng-repeat="game in games track by $index" >
           {{game.gameName}}
+          <ion-option-button class="button-positive" ng-click="editGame(game)">
+            Edit
+          </ion-option-button>
+          <ion-option-button class="button-assertive" ng-click="deleteGame(game)">
+            Delete
+          </ion-option-button>
         </ion-item>
       </ion-list>
     </ion-content>
-    <script id="templates/modal.html" type="text/ng-template">
+    <script id="templates/createoreditgame.html" type="text/ng-template">
       <ion-modal-view>
-        <ion-header-bar align-tite="center" class="bar bar-header bar-positive">
+        <ion-header-bar align-title="center" class="bar bar-header bar-positive">
           <h1 class="title">Game Settings</h1>
-          <button class="button button-clear button-primary" ng-click="modal.hide()">Cancel</button>
+          <button class="button button-clear button-primary" ng-click="exitCreateOrEditGamePage()">Cancel</button>
         </ion-header-bar>
         <ion-content class="padding">
           <div class="list">
             <label class="item item-input">
-              <span class="input-label">Game Name</span>
-              <input ng-model="newGame.gameName" type="text">
+              <span class="input-label"><b>Game Name</b></span>
+              <input ng-model="currentGameInstance.gameName" type="text">
             </label>
             <label class="item item-input">
-              <span class="input-label">Team A Name</span>
-              <input ng-model="newGame.teamA" type="text">
+              <span class="input-label"><b>Team A Name</b></span>
+              <input ng-model="currentGameInstance.teamA" type="text">
             </label>
             <label class="item item-input">
-              <span class="input-label">Team B Name</span>
-              <input ng-model="newGame.teamB" type="text">
+              <span class="input-label"><b>Team B Name</b></span>
+              <input ng-model="currentGameInstance.teamB" type="text">
             </label>
-            <ion-toggle ng-model="newGame.hasBODCount" toggle-class="toggle-calm">Balance Offense-Defense Count</ion-toggle>
-            <ion-toggle ng-model="newGame.hasSuperOptimizer" toggle-class="toggle-calm">Use Super Optimizer</ion-toggle>
-            <ion-toggle ng-show="newGame.hasSuperOptimizer" ng-model="newGame.hasBODCount" toggle-class="toggle-calm">Balance Offense-Defense Count</ion-toggle>
-            <button class="button button-full button-positive" ng-click="createGame(newGame)">Save</button>
+            <ion-toggle ng-model="currentGameInstance.hasBODCount" toggle-class="toggle-calm"><b>Balance Offense-Defense Count</b></ion-toggle>
+            <ion-toggle ng-model="currentGameInstance.hasSuperOptimizer" toggle-class="toggle-calm"><b>Use Super Optimizer</b></ion-toggle>
+            <ion-toggle ng-show="currentGameInstance.hasSuperOptimizer" ng-model="currentGameInstance.hasBODRatings" toggle-class="toggle-calm"><b>Balance O-D Ratings</b></ion-toggle>
+            <button class="button button-full button-positive" ng-click="createOrEditGame()">Save</button>
+            <button class="button button-full button-positive" ng-if="currentGameInstance.id !== undefined" ng-click="duplicateGame()">Duplicate</button>
           </div>
         </ion-content>
+      </ion-modal-view>
+    </script>
+    <script id="templates/playerlistactions.html" type="text/ng-template">
+      <ion-popover-view class="popover-height">
+        <ion-content scroll="false">
+          <ion-list>          
+            <ion-item ng-click="setIsSelectedBoolean(true)">
+              Select All Players
+            </ion-item>
+            <ion-item ng-click="setIsSelectedBoolean(false)">
+              Clear Selection
+            </ion-item>
+        </ion-list>
+        </ion-content>
+      </ion-popover-view>
+    </script>
+    <script id="templates/playerslist.html" type="text/ng-template">
+      <ion-modal-view>
+        <ion-header-bar align-title="center" class="bar bar-header bar-positive">
+          <button class="button button-clear button-primary" ng-click="playerslist.hide()">
+              <i class="ion-arrow-left-c"></i> Games List
+          </button>
+          <h1 class="title">{{currentGameInstance.gameName}}</h1>
+          <button class="button button-icon button-primary ion-gear-a" ng-click="openPlayerListActions($event)"></button>
+        </ion-header-bar>
+        <ion-content class="has-footer">
+          <ion-list>          
+            <ion-item ng-click="selectPlayer(player)" ng-repeat="player in currentGameInstance.players track by $index" >
+              <div class="player-item-players-list">
+                <b>{{player.name}}</b>
+                <div class="player-attribute-players-list">
+                  {{player.type}}
+                  <div class="player-item-preassigned-team" ng-if="player.preassign !== undefined && player.preassign">
+                  &nbsp; | &nbsp; Preassign: {{player.team}}  
+                  </div>
+                </div>
+              </div>
+              <div ng-if="player.isSelected" class="player-selected-mark ion-checkmark-round" />
+              <ion-option-button class="button-positive" ng-click="editPlayer(player)">
+                Edit
+              </ion-option-button>
+              <ion-option-button class="button-assertive" ng-click="deletePlayer(player)">
+                Delete
+              </ion-option-button>
+            </ion-item>
+          </ion-list>
+        </ion-content>
+        <ion-footer-bar align-title="center" class="bar-positive">
+          <div class="buttons">
+            <button class="button button-clear">Make Teams</button>
+          </div>
+          <h1 class="title"></h1>
+          <div class="buttons">
+            <button ng-click="addPlayer()" class="button button-clear">Add Player</button>
+          </div>
+        </ion-footer-bar>
+      </ion-modal-view>
+    </script>
+    <script id="templates/createoreditplayer.html" type="text/ng-template">
+      <ion-modal-view>
+        <ion-header-bar align-title="center" class="bar bar-header bar-positive">
+          <div class="buttons">
+            <button class="button button-clear" ng-click="closeCreateOrEditPage()">Done</button>
+          </div>
+          <h1 class="title"><b>{{currentGameInstance.gameName}} has {{currentGameInstance.players.length}} player(s)</b></h1>
+        </ion-header-bar>
+        <ion-content class="padding">
+          <div ng-if="currentGameInstance.lastPlayerAdded !== null">
+            <div class="last-player-added">{{currentGameInstance.lastPlayerAdded.name}} added</div>
+          </div>
+          <div class="list">
+            <label class="item item-input">
+              <span class="input-label"><b>Player Name</b></span>
+              <input ng-model="currentPlayer.name" type="text">
+            </label>
+            <label class="item item-input">
+              <span class="input-label"><b>Player Rating (0-10)</b></span>
+              <input ng-model="currentPlayer.rating" type="text">
+            </label>
+            <div class="item item-divider"> 
+              Type of Player
+            </div>
+            <ion-radio name="playerTypeAssignment" ng-repeat="playerType in ['Offense', 'Defense']" ng-value="playerType" ng-model="currentPlayer.type">
+              {{playerType}}
+            </ion-radio>
+            <div class="item item-divider"> 
+              Player Team Assignment
+            </div>
+            <ion-toggle ng-model="currentPlayer.preassign" toggle-class="toggle-calm"><b>Preassign player</b></ion-toggle>
+            <ion-radio name="playerTeam" ng-if="currentPlayer.preassign" ng-repeat="team in [currentGameInstance.teamA, currentGameInstance.teamB] track by $index" ng-value="team" ng-model="currentPlayer.team">
+              {{team}}
+            </ion-radio>
+            <button class="button button-full button-positive" ng-click="createOrEditPlayer()">Save</button>
+          </div>
+        </ion-content>
+      </ion-modal-view>
+    </script>
+    <script id="templates/instructions.html" type="text/ng-template">
+      <ion-modal-view>
+        <ion-header-bar align-title="center" class="bar bar-header bar-positive">
+          <h1 class="title">TeamChooser FAQ</h1>
+          <button class="button button-clear button-primary" ng-click="instructions.hide()">Cancel</button>
+        </ion-header-bar>
+        <ion-scroll direction="y" class="padding instructions">
+          <div class="padding">
+            TeamChooser helps you create balanced teams for regularly played friendly sports games, like pick-up games and scrimmages. <br>
+            Version 1.8. There are several new features in this version: <br>
+            The late arrivals feature minimally changes the teams with new players after you’ve already made the teams. <br>
+            The type size feature makes the lists easier to read for those without their reading glasses. <br>
+            The super-optimizer uses a different approach to balance the teams, and enables you to balance the quality of the offence and defence, not just the count.<br>
+            
+            <br><b>Quick-Start Instructions</b><br>
+            On the Game List screen, press the compose button on the top right hand corner.  <br>
+            Enter the name for your game (for example, "Friday Hockey" or "Monday Footy") and press Save.  <br>
+            Select your new game from the Game List screen, by tapping it.  This will take you to the game screen.<br>
+            Press “+” to begin entering the names and ratings of all the people who may play in the game.<br>
+            For each player, input a name and a rating number between 1 and 10. (See below for advice on how to choose the ratings; these are important if you want to achieve balanced teams.)<br>
+            Press Save for each new player.<br>
+            When done entering players, press Done. <br>
+            Back on the game screen (such as "Friday Hockey") you'll see the list of players you have entered. Indicate who is present on a given day by tapping their name. Tap the name again to mark them as away. <br>
+            Once you've selected everyone who is present, press Make teams. <br>
+            
+            More Details on TeamChooser <br>
+            <br><b>Setting Up Games</b><br>
+            You can create as many games as you'd like, with no limit to the number of players in each game. Change game settings by tapping the 'i' (info) circle next to the game name in the Game List. You can change the details of a game in the Game Settings screen, and also create a duplicate. <br>Duplicating a game makes it easy to experiment, for example with different player ratings. <br><br>
+
+            On the Game Settings screen, setting the Balance Offence-Defence Count switch to On will balance the number of players you have designated as offence with the number you have designated as defence. 
+            <br>New Feature: Super Optimizer with O-D Quality Balance
+            <br>You can also make use of an experimental version of the balance optimizer, called the “Super Optimizer,” in the Game Settings screen. This Super Optimizer applies a different approach to balancing the teams. Additionally, it enables you to balance the average ratings, or quality, of <br>offence and defence, not just the count. 
+            <br>Notes about the Super Optimizer: 
+            <br>If you set Balance O-D Ratings On, the optimizer may sacrifice some of the overall balance between the two teams, but not much.
+            <br>In some cases, such as when only a few players are designated as offence or defence, it’s not possible to balance the quality of offence and defence. TeamChooser indicates if it was able to do so on the Make Teams screen by showing “(ODQ Bal)” in the statistics line beside the team <br>heading. If this indicator is not present, this means that there wasn’t sufficient opportunity to do the O-D rating balancing.
+            <br>
+            <br><b>Adding and Rating Players</b>
+            <br>Once you have created a game, click on the game name (on the Game List screen) to access its player screen. Here, press the “+” button to add and rate players. The key to achieving a balanced game is to accurately rate the level of effectiveness of each player on a scale from 1 to 10 <br>(actually, you can use a larger scale if you’d like). The effectiveness rating should boil down all of their attributes to one number.  That number represents the player’s contribution to the outcome of the game. Some skilled players do not necessarily put out huge effort, and may be <br>less effective than unskilled players who try harder.
+            <br>
+            <br>We suggest the following method to select the ratings for your players: List the players in order of effectiveness. Then, group players who play at a similar level. Assuming a 10-point scale (you can vary this if you’d like), assign the top group a score of 8 the next 6, 4, and so on. <br>Within the groups, make adjustments to reflect differences. Make sure you leave a little room at the bottom and top of the scale to add new players outside of the range of the current players.
+            <br>If you feel uncomfortable making these ratings yourself, try consulting others.  We have found it helpful to consult with 1 or 2 other people to reach a consensus on the numbers.  However, it is best not to tell too many people what the ratings are, as it is personal and can be <br>sensitive.
+            <br>Other Player Settings 
+            <br>When you add players, you can set whether they are more suited to offence or defence.  To balance the teams by offence and by defence (in addition to the overall balance), use the switches in the Game Settings screen, as described above. You can also set a player to be on a particular <br>team by turning on the Pre-assign switch, and then selecting the team you wish them to appear on. This is an easy way to put players on the same team, or to ensure they are opponents.
+            <br>
+            <br><b>Changing Player Settings</b>
+            <br>You can edit the player details by first selecting Edit… on the game screen. Then select the 'i' (info) link for the desired player. When you are done, press Done editing players.
+            <br>
+            <br><b>What to Balance: The Play or the Score?</b>
+            <br>If your game type involves a unique player position that can have a big impact on the outcome – such as a goaltender in hockey or soccer, a quarterback in American football, or a pitcher in baseball – you need to consider whether it’s more important to have even play or a close score. <br>If your preference is for even play, then we suggest excluding the unique player position from the player list and just assigning it manually. Alternatively, if you prefer a close score, include the player position and pre-assign the two people who will play this position to opposite <br>teams. Do your best to rate these players according to the contribution they will have, which is generally much stronger than the other players due to their unique position. (Note: In our experience, most players have more fun when the play is balanced, regardless of the score.)
+            <br>
+            <br><b>Making the Teams</b>
+            <br>Once you’ve checked the names of the players who have shown up for the game, select Make teams. Based on your ratings and the game settings, TeamChooser will optimize the balance of the teams. 
+            <br>
+            <br><b>Reviewing the Game Balance</b>
+            <br>Beside each team heading you will see four numbers. The first number gives the average rating of all players on that team.  The next number, after the “D:” gives the average rating of the defence players. Then you’ll see the average rating of the offence players (after “O:”). Finally, <br>the total number of players on the team is shown after “COUNT”. 
+            <br>Players Arriving Late
+            <br>Sometimes players arrive late, after you've selected Make teams. To minimally disrupt the assigned teams and still preserve a balanced game, press the New Arrivals button at the top of the Teams screen. Select Yes in the confirmation message, and then select the new players that have <br>arrived. When you select Make teams again, TeamChooser will assign the late players and make no more than two changes to the current teams. TeamChooser will highlight the names of the players who’ve had their team change so you can let them know. Also, the newly arrived players will be indicated.
+            <br><br><b>Tweaking Teams</b>
+            <br>To make minor changes to the teams suggested by TeamChooser, press the Tweak button. This will swap two players to make the average rating of each team as close as possible. Of course, if you’ve done a good job rating the players, you can trust TeamChooser’s initial suggestion to <br>provide the best balance.
+            <br>
+            <br><b>Feedback?</b>
+            <br>Please help us improve TeamChooser. Email us at TeamChooserapp@gmail.com with your suggestions.
+            <br><br><div></div>
+          </div>
+        <ion-scroll>
       </ion-modal-view>
     </script>
   </body>
