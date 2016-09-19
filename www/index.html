@@ -49,11 +49,11 @@
             </label>
             <label class="item item-input">
               <span class="input-label"><b>Team A Name</b></span>
-              <input ng-model="currentGameInstance.teamA" type="text">
+              <input ng-model="currentGameInstance.teamA.name" type="text">
             </label>
             <label class="item item-input">
               <span class="input-label"><b>Team B Name</b></span>
-              <input ng-model="currentGameInstance.teamB" type="text">
+              <input ng-model="currentGameInstance.teamB.name" type="text">
             </label>
             <ion-toggle ng-model="currentGameInstance.hasBODCount" toggle-class="toggle-calm"><b>Balance Offense-Defense Count</b></ion-toggle>
             <ion-toggle ng-model="currentGameInstance.hasSuperOptimizer" toggle-class="toggle-calm"><b>Use Super Optimizer</b></ion-toggle>
@@ -78,16 +78,42 @@
         </ion-content>
       </ion-popover-view>
     </script>
+    <script id="templates/teamlist.html" type="text/ng-template">
+      <ion-modal-view>
+        <ion-header-bar align-title="center" class="bar bar-header bar-positive">
+          <button ng-click="teamlist.hide()" class="button button-clear button-primary" ng-click="returnToPlayerList()">
+              <i class="ion-arrow-left-c"></i> Player List
+          </button>
+          <h1 class="title">Teams</h1>
+        </ion-header-bar>
+        <ion-content class="padding">
+          <div class="item item-divider">{{currentGameInstance.teamA.name}}</div>
+          <ion-list>          
+            <ion-item ng-repeat="playerA in currentGameInstance.players track by $index" >
+              {{playerA.name}}
+            </ion-item>
+          </div>
+          <div class="item item-divider">{{currentGameInstance.teamB.name}}</div>
+          <ion-list>          
+            <ion-item ng-repeat="playerB in currentGameInstance.players track by $index" >
+              {{playerB.name}}
+            </ion-item>
+          </div>
+        </ion-modal-view>
+    </script>
     <script id="templates/playerslist.html" type="text/ng-template">
       <ion-modal-view>
         <ion-header-bar align-title="center" class="bar bar-header bar-positive">
-          <button class="button button-clear button-primary" ng-click="playerslist.hide()">
-              <i class="ion-arrow-left-c"></i> Games List
+          <button class="button button-clear button-primary" ng-click="returnToGameList()">
+              <i class="ion-arrow-left-c"></i> Game List
           </button>
           <h1 class="title">{{currentGameInstance.gameName}}</h1>
           <button class="button button-icon button-primary ion-gear-a" ng-click="openPlayerListActions($event)"></button>
         </ion-header-bar>
         <ion-content class="has-footer">
+          <div ng-if="currentGameInstance.selectedPlayers > 0">
+            <div class="last-player-added">{{currentGameInstance.selectedPlayers}} player(s) selected (D:{{currentGameInstance.defensePlayers}} O:{{currentGameInstance.offensePlayers}})</div>
+          </div>
           <ion-list>          
             <ion-item ng-click="selectPlayer(player)" ng-repeat="player in currentGameInstance.players track by $index" >
               <div class="player-item-players-list">
@@ -110,7 +136,7 @@
           </ion-list>
         </ion-content>
         <ion-footer-bar align-title="center" class="bar-positive">
-          <div class="buttons">
+          <div ng-click="teamlist.show()" class="buttons">
             <button class="button button-clear">Make Teams</button>
           </div>
           <h1 class="title"></h1>
@@ -151,7 +177,7 @@
               Player Team Assignment
             </div>
             <ion-toggle ng-model="currentPlayer.preassign" toggle-class="toggle-calm"><b>Preassign player</b></ion-toggle>
-            <ion-radio name="playerTeam" ng-if="currentPlayer.preassign" ng-repeat="team in [currentGameInstance.teamA, currentGameInstance.teamB] track by $index" ng-value="team" ng-model="currentPlayer.team">
+            <ion-radio name="playerTeam" ng-if="currentPlayer.preassign" ng-repeat="team in [currentGameInstance.teamA.name, currentGameInstance.teamB.name] track by $index" ng-value="team" ng-model="currentPlayer.team">
               {{team}}
             </ion-radio>
             <button class="button button-full button-positive" ng-click="createOrEditPlayer()">Save</button>

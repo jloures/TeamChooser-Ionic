@@ -42,6 +42,12 @@ angular.module('ionicApp', ['ionic'])
     $scope.playerslist = playerslist; 
   });
 
+  $ionicModal.fromTemplateUrl('templates/teamlist.html', {
+    scope: $scope
+  }).then(function(teamlist) {
+    $scope.teamlist = teamlist; 
+  });
+
   $scope.openPlayerListActions = function($event) {
     $scope.playerlistactions.show($event);
   };
@@ -50,7 +56,7 @@ angular.module('ionicApp', ['ionic'])
   };
 
   $scope.$on('$destroy', function() {
-    $scope.playerlistactions.remove();
+    
   });
 
   $scope.openPlayersList = function(game) {
@@ -62,7 +68,9 @@ angular.module('ionicApp', ['ionic'])
     var players = $scope.currentGameInstance.players;
     for( var i = 0; i < players.length; i++ ) {
       var player = players[i];
-      player.isSelected = booleanValue;
+      if( player.isSelected !== booleanValue ) {
+        $scope.selectPlayer(player);
+      }
     }
     $scope.playerlistactions.hide();
   }
@@ -76,6 +84,8 @@ angular.module('ionicApp', ['ionic'])
 
   $scope.selectPlayer = function(player) {
     player.isSelected = !player.isSelected;
+    $scope.currentGameInstance.selectedPlayers += player.isSelected ? 1 : -1;
+    $scope.recalculatePlayerTypes();
   }
 
   $scope.addPlayer = function() {
@@ -97,6 +107,9 @@ angular.module('ionicApp', ['ionic'])
       return;
     }
     var players = $scope.currentGameInstance.players;
+    if( player.isSelected ) {
+      $scope.currentGameInstance.selectedPlayers--;
+    }
     players.splice(playerIndex, 1);
     if( players.length !== 0 ) {
       $scope.currentGameInstance.lastPlayerAdded = players[players.length -1];
@@ -104,6 +117,13 @@ angular.module('ionicApp', ['ionic'])
       $scope.currentGameInstance.lastPlayerAdded = null;
     }
     $scope.currentPlayer = {};
+    $scope.recalculatePlayerTypes();
+    $ionicListDelegate.closeOptionButtons();
+  }
+
+  $scope.returnToGameList = function() {
+    $scope.currentGameInstance = {};
+    $scope.playerslist.hide();
   }
 
   $scope.createOrEditPlayer = function() {
@@ -111,13 +131,13 @@ angular.module('ionicApp', ['ionic'])
     var isNewPlayer = playerObject.id === undefined;
     if( isNewPlayer ) {
       playerObject = clone($scope.currentPlayer);
+      playerObject.isSelected = false;
     }
     if( errorCheckingPlayer(playerObject, $scope.currentGameInstance.players, $ionicPopup) < 0 ) {
       return;
     }
     //verify pre-assign
     playerObject.team = playerObject.preassign ? playerObject.team : null;
-    playerObject.isSelected = false;
     if( isNewPlayer ) {
       playerObject.id = ++$scope.playerId;
       $scope.currentGameInstance.players.push(playerObject);
@@ -128,6 +148,7 @@ angular.module('ionicApp', ['ionic'])
       $scope.createoreditplayer.hide();
     }
     console.log({Player: $scope.currentGameInstance.players});
+    $scope.recalculatePlayerTypes();
   }
 
   $scope.deleteGame = function(game) {
@@ -174,10 +195,12 @@ angular.module('ionicApp', ['ionic'])
     }
 
     gameInstance.hasBODRatings = gameInstance.hasSuperOptimizer && gameInstance.hasBODRatings;
-
     if( isNewGame ) {
       gameInstance.id = ++$scope.numberOfgames;
+      gameInstance.selectedPlayers = 0;
       gameInstance.players = [];
+      gameInstance.offensePlayers = 0;
+      gameInstance.defensePlayers = 0;
       gameInstance.lastPlayerAdded = null;
       $scope.games.push(gameInstance);
     }
@@ -186,6 +209,21 @@ angular.module('ionicApp', ['ionic'])
     //set all properties to default
     console.log($scope.games);
     $scope.currentGameInstance = {};
+  }
+
+  $scope.recalculatePlayerTypes = function() {
+    var players = $scope.currentGameInstance.players;
+    $scope.currentGameInstance.offensePlayers = 0;
+    $scope.currentGameInstance.defensePlayers = 0;
+    for(var i = 0; i < players.length; i++) {
+      if( players[i].isSelected ) {
+        if( players[i].type === 'Offense' ) {
+          $scope.currentGameInstance.offensePlayers++;
+        } else if( players[i].type === 'Defense' ) {
+          $scope.currentGameInstance.defensePlayers++;
+        }
+      }
+    }
   }
 });
 
@@ -198,7 +236,7 @@ var erroCheckingGame = function(game, $ionicPopup) {
       return -1;
     }
 
-    if( game.teamA === undefined || game.teamA.trim() === "") {
+    if( game.teamA === undefined || game.teamA.name === undefined || game.teamA.name.trim() === "") {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Team A name has to be valid!'
@@ -206,7 +244,7 @@ var erroCheckingGame = function(game, $ionicPopup) {
       return -1;
     }
 
-    if( game.teamB === undefined || game.teamB.trim() === "") {
+    if( game.teamB === undefined || game.teamB.name === undefined || game.teamB.name.trim() === "") {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Team B name has to be valid!'
@@ -214,7 +252,7 @@ var erroCheckingGame = function(game, $ionicPopup) {
       return -1;
     }
 
-    if( game.teamA === game.teamB ) {
+    if( game.teamA.name === game.teamB.name ) {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Two teams cannot have the same name!'
