@@ -158,6 +158,7 @@ angular.module('ionicApp', ['ionic'])
     }
     $scope.games.splice(gameIndex, 1);
     $scope.currentGameInstance = {};
+    $ionicListDelegate.closeOptionButtons();
   }
 
   $scope.exitCreateOrEditGamePage = function() {
