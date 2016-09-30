@@ -7,7 +7,7 @@ angular.module('ionicApp', ['ionic'])
 .controller('AppCtrl', function($scope, $ionicPopup, $ionicPopover, $ionicModal, $ionicListDelegate) {
   
   $scope.games = [];
-  $scope.currentGameInstance = {};
+  $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
   $scope.currentPlayer = {};
   $scope.numberOfgames = 0;
   $scope.playerId = 0;
@@ -122,7 +122,7 @@ angular.module('ionicApp', ['ionic'])
   }
 
   $scope.returnToGameList = function() {
-    $scope.currentGameInstance = {};
+    $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
     $scope.playerslist.hide();
   }
 
@@ -157,12 +157,12 @@ angular.module('ionicApp', ['ionic'])
       return;
     }
     $scope.games.splice(gameIndex, 1);
-    $scope.currentGameInstance = {};
+    $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
     $ionicListDelegate.closeOptionButtons();
   }
 
   $scope.exitCreateOrEditGamePage = function() {
-    $scope.currentGameInstance = {};
+    $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
     $scope.createoreditgame.hide();
   }
 
@@ -181,7 +181,7 @@ angular.module('ionicApp', ['ionic'])
     $scope.games.push(newInstance);
     $scope.createoreditgame.hide();
     //set all properties to default
-    $scope.currentGameInstance = {};
+    $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
   }
 
   $scope.createOrEditGame = function() {
@@ -209,7 +209,7 @@ angular.module('ionicApp', ['ionic'])
     $scope.createoreditgame.hide();
     //set all properties to default
     console.log($scope.games);
-    $scope.currentGameInstance = {};
+    $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};;
   }
 
   $scope.recalculatePlayerTypes = function() {
