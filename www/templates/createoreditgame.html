@@ -1,0 +1,27 @@
+<ion-modal-view>
+    <ion-header-bar align-title="center" class="bar bar-header bar-positive">
+        <h1 class="title">Game Settings</h1>
+        <button class="button button-clear button-primary" ng-click="exitCreateOrEditGamePage()">Cancel</button>
+    </ion-header-bar>
+        <ion-content class="padding">
+            <div class="list">
+                <label class="item item-input">
+                    <span class="input-label"><b>Game Name</b></span>
+                    <input ng-model="currentGameInstance.gameName" type="text">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label"><b>Team A Name</b></span>
+                    <input ng-model="currentGameInstance.teamA.name" type="text">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label"><b>Team B Name</b></span>
+                    <input ng-model="currentGameInstance.teamB.name" type="text">
+                </label>
+                <ion-toggle ng-model="currentGameInstance.hasBODCount" toggle-class="toggle-calm"><b>Balance Offense-Defense Count</b></ion-toggle>
+                <ion-toggle ng-model="currentGameInstance.hasSuperOptimizer" toggle-class="toggle-calm"><b>Use Super Optimizer</b></ion-toggle>
+                <ion-toggle ng-show="currentGameInstance.hasSuperOptimizer" ng-model="currentGameInstance.hasBODRatings" toggle-class="toggle-calm"><b>Balance O-D Ratings</b></ion-toggle>
+                <button class="button button-full button-positive" ng-click="createOrEditGame()">Save</button>
+                <button class="button button-full button-positive" ng-if="currentGameInstance.id !== undefined" ng-click="duplicateGame()">Duplicate</button>
+            </div>
+        </ion-content>
+</ion-modal-view>

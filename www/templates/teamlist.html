@@ -1,0 +1,23 @@
+<ion-modal-view>
+    <ion-header-bar align-title="center" class="bar bar-header bar-positive">
+        <button ng-click="teamlist.hide()" class="button button-clear button-primary" ng-click="returnToPlayerList()">
+            <i class="ion-arrow-left-c"></i> Player List
+        </button>
+        <h1 class="title">Teams</h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+        <div class="item item-divider">{{currentGameInstance.teamA.name}}</div>
+            <ion-list>          
+                <ion-item ng-repeat="playerA in currentGameInstance.players track by $index" >
+                    {{playerA.name}}
+                </ion-item>
+            </ion-list>        
+        </div>
+        <div class="item item-divider">{{currentGameInstance.teamB.name}}</div>
+            <ion-list>          
+                <ion-item ng-repeat="playerB in currentGameInstance.players track by $index" >
+                    {{playerB.name}}
+                </ion-item>
+            </ion-list>
+        </div>
+</ion-modal-view>
