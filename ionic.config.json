@@ -1,4 +1,14 @@
 {
   "name": "TeamChooser-Ionic",
-  "app_id": ""
+  "app_id": "",
+  "proxies": [{
+    "path": "/signup",
+    "proxyUrl": "http://localhost:3000/signup"
+  },{
+    "path": "/login",
+    "proxyUrl": "http://localhost:3000/login"
+  },{
+    "path": "/recovery",
+    "proxyUrl": "http://localhost:3000/recovery"
+  }]
 }
