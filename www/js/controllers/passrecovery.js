@@ -1,3 +1,5 @@
+var config = require('../config.js');
+
 module.exports = function($scope, $ionicPopup, $http, $state) {
     $scope.recovery = {};
     $scope.returnToLoginPage = function() {
@@ -16,15 +18,14 @@ module.exports = function($scope, $ionicPopup, $http, $state) {
             return;
         }
         $http.post(
-            '/recovery', 
+            config.endpoint + '/recovery', 
             data
         ).then(function(res){
-            console.log(res)
             $state.go('login');
         }, function(err){
             $ionicPopup.alert({
                 title: 'Error',
-                template: 'CUSTOM MESSAGE HERE'
+                template: err.data
             });
         });
     }

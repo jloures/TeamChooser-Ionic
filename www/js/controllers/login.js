@@ -1,5 +1,5 @@
 //dependencies
-var request = require('superagent');
+var config = require('../config.js');
 
 module.exports = function($scope, $state, $ionicPopup, $http) {
     
@@ -21,17 +21,16 @@ module.exports = function($scope, $state, $ionicPopup, $http) {
             return;
         }
         $http.post(
-            '/login',
+            config.endpoint + '/login',
             data
         ).then(function(res){
             //call the service here to set gameInstances
             //userId should come from response
-            console.log(res);
             $state.go('gameslist', {userId: 0});
         }, function(err){
             $ionicPopup.alert({
                 title: 'Error',
-                template: 'CUSTOM MESSAGE HERE'
+                template: err.data
             });
         });
     }

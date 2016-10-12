@@ -5,8 +5,9 @@
         An Ionic Framework and Cordova project.
     </description>
     <content src="index.html" />
-    <access origin="*" />
     <allow-intent href="*" />
+    <allow-navigation href="http://*/*" />
+    <access origin="*" subdomains="true"/>
     <preference name="webviewbounce" value="false" />
     <preference name="UIWebViewBounce" value="false" />
     <preference name="DisallowOverscroll" value="true" />

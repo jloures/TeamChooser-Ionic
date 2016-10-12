@@ -1,5 +1,4 @@
 //dependencies
-var request = require('superagent');
 var config = require('../config.js');
 
 module.exports = function($scope, $http, $state, $ionicPopup) {
@@ -18,7 +17,7 @@ module.exports = function($scope, $http, $state, $ionicPopup) {
             return;
         } 
         $http.post(
-            '/signup', 
+            config.endpoint + '/signup', 
             data
         ).then(function(res){
             console.log(res)
@@ -26,7 +25,7 @@ module.exports = function($scope, $http, $state, $ionicPopup) {
         }, function(err){
             $ionicPopup.alert({
                 title: 'Error',
-                template: 'CUSTOM MESSAGE HERE'
+                template: err.data
             });
         });
     }
