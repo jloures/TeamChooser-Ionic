@@ -57,6 +57,11 @@ module.exports = function(
     $scope.teamlist = teamlist; 
   });
 
+  $scope.showTeamList = function() {
+    $scope.playerlistactions.hide();
+    $scope.teamlist.show();
+  }
+
   $scope.openPlayerListActions = function($event) {
     $scope.playerlistactions.show($event);
   };
@@ -94,6 +99,7 @@ module.exports = function(
   }
 
   $scope.addPlayer = function() {
+    $scope.playerlistactions.hide();
     $scope.currentGameInstance.lastPlayerAdded = null;
     $scope.createoreditplayer.show();
     $ionicListDelegate.closeOptionButtons();
