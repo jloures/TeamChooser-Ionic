@@ -440,8 +440,9 @@ var clone = function clone(obj) {
 },{}],5:[function(require,module,exports){
 //dependencies
 var config = require('../config.js');
+var utils = require('../utils.js');
 
-module.exports = function($scope, $state, $ionicPopup, $http) {
+module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading) {
     
     $scope.goToSignUp = function() {
         $state.go('signup');
@@ -452,8 +453,11 @@ module.exports = function($scope, $state, $ionicPopup, $http) {
     }
 
     $scope.login = function() {
+        // start the loading page
+        utils.showLoading("Signing In...", $ionicLoading);
         var data = parseLoginInfo($scope);
         if( errorCheckingLogin(data) < 0 ) {
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: 'One or more fields are incorrect'
@@ -464,10 +468,13 @@ module.exports = function($scope, $state, $ionicPopup, $http) {
             config.endpoint + '/login',
             data
         ).then(function(res){
+            //hide the loading 
+            utils.hideLoading($ionicLoading);
             //call the service here to set gameInstances
             //userId should come from response
             $state.go('gameslist', {userId: 0});
         }, function(err){
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: err.data
@@ -492,7 +499,7 @@ var errorCheckingLogin = function(data) {
    }
    return 0;
 }
-},{"../config.js":2}],6:[function(require,module,exports){
+},{"../config.js":2,"../utils.js":10}],6:[function(require,module,exports){
 var config = require('../config.js');
 
 module.exports = function($scope, $ionicPopup, $http, $state) {
@@ -546,16 +553,19 @@ var parseEmail = function(email) {
 },{"../config.js":2}],7:[function(require,module,exports){
 //dependencies
 var config = require('../config.js');
+var utils = require('../utils.js');
 
-module.exports = function($scope, $http, $state, $ionicPopup) {
+module.exports = function($scope, $http, $state, $ionicPopup, $ionicLoading) {
     $scope.signup = {};
 
     $scope.returnToLoginPage = function() {
         $state.go('login');
     }
     $scope.createNewUser = function() {
+        utils.showLoading("Adding new user...", $ionicLoading);
         var data = parseSignUpInfo($scope);
         if( errorCheckingSignUp(data) < 0 ) {
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: 'One or more fields are incorrect'
@@ -566,9 +576,10 @@ module.exports = function($scope, $http, $state, $ionicPopup) {
             config.endpoint + '/signup', 
             data
         ).then(function(res){
-            console.log(res)
+            utils.hideLoading($ionicLoading);
             $state.go('login');
         }, function(err){
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: err.data
@@ -622,7 +633,7 @@ var parseEmail = function(email) {
     }
     return 0;
 }
-},{"../config.js":2}],8:[function(require,module,exports){
+},{"../config.js":2,"../utils.js":10}],8:[function(require,module,exports){
 angular.module('ionicApp.services', [])
 //data providers
 .factory('GamesManager', require('./services/gamesmanager.js'))
@@ -663,4 +674,16 @@ module.exports = function() {
         }
     }
 }
+},{}],10:[function(require,module,exports){
+module.exports = {
+    showLoading: function(message, $ionicLoading) {
+        $ionicLoading.show({
+            template: message
+        });
+    },
+
+    hideLoading: function($ionicLoading) {
+        $ionicLoading.hide();
+    }
+};
 },{}]},{},[1,3,8]);

@@ -1,15 +1,18 @@
 //dependencies
 var config = require('../config.js');
+var utils = require('../utils.js');
 
-module.exports = function($scope, $http, $state, $ionicPopup) {
+module.exports = function($scope, $http, $state, $ionicPopup, $ionicLoading) {
     $scope.signup = {};
 
     $scope.returnToLoginPage = function() {
         $state.go('login');
     }
     $scope.createNewUser = function() {
+        utils.showLoading("Adding new user...", $ionicLoading);
         var data = parseSignUpInfo($scope);
         if( errorCheckingSignUp(data) < 0 ) {
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: 'One or more fields are incorrect'
@@ -20,9 +23,10 @@ module.exports = function($scope, $http, $state, $ionicPopup) {
             config.endpoint + '/signup', 
             data
         ).then(function(res){
-            console.log(res)
+            utils.hideLoading($ionicLoading);
             $state.go('login');
         }, function(err){
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: err.data

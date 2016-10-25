@@ -1,7 +1,8 @@
 //dependencies
 var config = require('../config.js');
+var utils = require('../utils.js');
 
-module.exports = function($scope, $state, $ionicPopup, $http) {
+module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading) {
     
     $scope.goToSignUp = function() {
         $state.go('signup');
@@ -12,8 +13,11 @@ module.exports = function($scope, $state, $ionicPopup, $http) {
     }
 
     $scope.login = function() {
+        // start the loading page
+        utils.showLoading("Signing In...", $ionicLoading);
         var data = parseLoginInfo($scope);
         if( errorCheckingLogin(data) < 0 ) {
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: 'One or more fields are incorrect'
@@ -24,10 +28,13 @@ module.exports = function($scope, $state, $ionicPopup, $http) {
             config.endpoint + '/login',
             data
         ).then(function(res){
+            //hide the loading 
+            utils.hideLoading($ionicLoading);
             //call the service here to set gameInstances
             //userId should come from response
             $state.go('gameslist', {userId: 0});
         }, function(err){
+            utils.hideLoading($ionicLoading);
             $ionicPopup.alert({
                 title: 'Error',
                 template: err.data
