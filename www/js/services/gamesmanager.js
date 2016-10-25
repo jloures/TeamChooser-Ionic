@@ -28,6 +28,7 @@ module.exports = function() {
             for(var i = 0; i < games.length; i++) {
                 if( games[i].id == newGame.id ) {
                     games[i] = newGame;
+                    return;
                 }
             }
         }

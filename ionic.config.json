@@ -3,12 +3,12 @@
   "app_id": "",
   "proxies": [{
     "path": "/signup",
-    "proxyUrl": "http://teammaker.herokuapp.com/signup"
+    "proxyUrl": "http://localhost:4000/signup"
   },{
     "path": "/login",
-    "proxyUrl": "http://teammaker.herokuapp.com/login"
+    "proxyUrl": "http://localhost:4000/login"
   },{
     "path": "/recovery",
-    "proxyUrl": "http://teammaker.herokuapp.com/recovery"
+    "proxyUrl": "http://localhost:4000/recovery"
   }]
 }

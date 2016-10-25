@@ -1,10 +1,19 @@
-module.exports = function($scope, $ionicPopup, $ionicPopover, $ionicModal, $ionicListDelegate) {
+module.exports = function(
+  $scope,
+  $ionicPopup,
+  $ionicPopover,
+  $ionicModal,
+  $ionicListDelegate,
+  $stateParams
+) {
   
   $scope.games = [];
   $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
   $scope.currentPlayer = {};
   $scope.numberOfgames = 0;
   $scope.playerId = 0;
+
+  console.log($stateParams);
 
   $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
     scope: $scope

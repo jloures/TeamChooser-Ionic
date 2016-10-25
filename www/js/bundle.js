@@ -34,7 +34,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
 
 },{}],2:[function(require,module,exports){
 module.exports = {
-    endpoint: "http://teammaker.herokuapp.com"
+    endpoint: ""
 }
 
 /*
@@ -51,13 +51,22 @@ angular.module('ionicApp.controllers', [])
 .controller('PassRecoveryCtrl', require('./controllers/passrecovery.js'))
 
 },{"./controllers/appctrl.js":4,"./controllers/login.js":5,"./controllers/passrecovery.js":6,"./controllers/signup.js":7}],4:[function(require,module,exports){
-module.exports = function($scope, $ionicPopup, $ionicPopover, $ionicModal, $ionicListDelegate) {
+module.exports = function(
+  $scope,
+  $ionicPopup,
+  $ionicPopover,
+  $ionicModal,
+  $ionicListDelegate,
+  $stateParams
+) {
   
   $scope.games = [];
   $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
   $scope.currentPlayer = {};
   $scope.numberOfgames = 0;
   $scope.playerId = 0;
+
+  console.log($stateParams);
 
   $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
     scope: $scope
@@ -648,6 +657,7 @@ module.exports = function() {
             for(var i = 0; i < games.length; i++) {
                 if( games[i].id == newGame.id ) {
                     games[i] = newGame;
+                    return;
                 }
             }
         }
