@@ -13,7 +13,13 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     url: '/:userId/gameslist',
     cache: false,
     templateUrl: 'templates/gameslist.html',
-    controller: 'AppCtrl'
+    controller: 'GamesList'
+  })
+  .state('createoreditgame', {
+    url: '/:userId/createoreditgame',
+    cache: false,
+    templateUrl: 'templates/createoreditgame.html',
+    controller: 'CreateOrEditGame'
   })
   .state('signup', {
     url: '/signup',

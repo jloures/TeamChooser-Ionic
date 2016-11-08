@@ -14,7 +14,13 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     url: '/:userId/gameslist',
     cache: false,
     templateUrl: 'templates/gameslist.html',
-    controller: 'AppCtrl'
+    controller: 'GamesList'
+  })
+  .state('createoreditgame', {
+    url: '/:userId/createoreditgame',
+    cache: false,
+    templateUrl: 'templates/createoreditgame.html',
+    controller: 'CreateOrEditGame'
   })
   .state('signup', {
     url: '/signup',
@@ -45,19 +51,25 @@ module.exports = {
 },{}],3:[function(require,module,exports){
 angular.module('ionicApp.controllers', [])
 //controllers
-.controller('AppCtrl', require('./controllers/appctrl.js'))
+.controller('CreateOrEditGame', require('./controllers/createoreditgame.js'))
+.controller('GamesList', require('./controllers/gameslist.js'))
 .controller('LoginCtrl', require('./controllers/login.js'))
-.controller('SignUpCtrl', require('./controllers/signup.js'))
 .controller('PassRecoveryCtrl', require('./controllers/passrecovery.js'))
+.controller('SignUpCtrl', require('./controllers/signup.js'))
 
-},{"./controllers/appctrl.js":4,"./controllers/login.js":5,"./controllers/passrecovery.js":6,"./controllers/signup.js":7}],4:[function(require,module,exports){
+},{"./controllers/createoreditgame.js":4,"./controllers/gameslist.js":5,"./controllers/login.js":6,"./controllers/passrecovery.js":7,"./controllers/signup.js":8}],4:[function(require,module,exports){
+
+},{}],5:[function(require,module,exports){
+var utils = require('../utils.js');
+
 module.exports = function(
   $scope,
   $ionicPopup,
   $ionicPopover,
   $ionicModal,
   $ionicListDelegate,
-  $stateParams
+  $stateParams,
+  GamesManager
 ) {
   
   $scope.games = [];
@@ -65,8 +77,6 @@ module.exports = function(
   $scope.currentPlayer = {};
   $scope.numberOfgames = 0;
   $scope.playerId = 0;
-
-  console.log($stateParams);
 
   $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
     scope: $scope
@@ -92,12 +102,6 @@ module.exports = function(
     $scope.gameslist = gameslist; 
   });
 
-  /*$ionicModal.fromTemplateUrl('templates/instructions.html', {
-    scope: $scope
-  }).then(function(instructions) {
-    $scope.instructions = instructions; 
-  });*/
-  
   $ionicModal.fromTemplateUrl('templates/playerslist.html', {
     scope: $scope
   }).then(function(playerslist) {
@@ -159,14 +163,14 @@ module.exports = function(
   }
 
   $scope.editPlayer = function(player) {
-    $scope.currentPlayer = clone(player);
+    $scope.currentPlayer = utils.clone(player);
     $scope.currentGameInstance.lastPlayerAdded = null;
     $scope.createoreditplayer.show();
     $ionicListDelegate.closeOptionButtons();
   }
 
   $scope.deletePlayer = function(player) {
-    var playerIndex = findIndex($scope.currentGameInstance.players,player);
+    var playerIndex = utils.findIndex($scope.currentGameInstance.players,player);
     if( playerIndex === -1 ) {
       return;
     }
@@ -206,7 +210,7 @@ module.exports = function(
       playerObject.id = ++$scope.playerId;
       $scope.currentGameInstance.players.push(playerObject);
     } else {
-      var index = findIndex($scope.currentGameInstance.players, playerObject);
+      var index = utils.findIndex($scope.currentGameInstance.players, playerObject);
       $scope.currentGameInstance.players[index] = playerObject;
     }
     $scope.currentGameInstance.lastPlayerAdded = isNewPlayer ? playerObject : null;
@@ -218,7 +222,7 @@ module.exports = function(
   }
 
   $scope.deleteGame = function(game) {
-    var gameIndex = findIndex($scope.games,game);
+    var gameIndex = utils.findIndex($scope.games,game);
     if( gameIndex === -1 ) {
       return;
     }
@@ -233,13 +237,13 @@ module.exports = function(
   }
 
   $scope.editGame = function(game) {
-    $scope.currentGameInstance = clone(game);
+    $scope.currentGameInstance = utils.clone(game);
     $scope.createoreditgame.show();
     $ionicListDelegate.closeOptionButtons();
   }
 
   $scope.duplicateGame = function() {
-    var newInstance = clone($scope.currentGameInstance);
+    var newInstance = utils.clone($scope.currentGameInstance);
     if( erroCheckingGame(newInstance, $ionicPopup, $scope.games) < 0 ) {
       return;
     }
@@ -271,7 +275,7 @@ module.exports = function(
       gameInstance.lastPlayerAdded = null;
       $scope.games.push(gameInstance);
     } else {
-      var index = findIndex($scope.games,gameInstance);
+      var index = utils.findIndex($scope.games,gameInstance);
       $scope.games[index] = gameInstance;
     }
 
@@ -404,46 +408,9 @@ var parseRating = function(possibleNumber) {
   return !isNaN(possibleNumber) && floatVar >= 0 && floatVar <=10 ? floatVar.toFixed(2) : null;
 }
 
-var findIndex = function(array,object) {
-  for(var i = 0; i < array.length; i++) {
-    if( array[i].id === object.id ) {
-      return i;
-    }
-  }
-  return -1;
-}
 
-//common util
-var clone = function clone(obj) {
-  if (null == obj || "object" != typeof obj) return obj;
-  var copy = {};
-  if( obj.length !== undefined ) {
-    var arrayCopy = [];
-    for(var i = 0; i < obj.length; i++) {
-      var objInArray = obj[i];
-      if( objInArray.length !== undefined ) {
-        arrayCopy[i] = clone(objInArray);
-      } else {
-        copy = {};
-        for (var attr in objInArray) {
-          if (objInArray.hasOwnProperty(attr)) {
-              copy[attr] = clone(objInArray[attr]);
-            }
-        }
-        arrayCopy[i] = copy;
-      }
-    }
-    return arrayCopy;
-  } else {
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) {
-          copy[attr] = clone(obj[attr]);
-        }
-    }
-  }
-  return copy;
-}
-},{}],5:[function(require,module,exports){
+
+},{"../utils.js":11}],6:[function(require,module,exports){
 //dependencies
 var config = require('../config.js');
 var utils = require('../utils.js');
@@ -505,7 +472,7 @@ var errorCheckingLogin = function(data) {
    }
    return 0;
 }
-},{"../config.js":2,"../utils.js":10}],6:[function(require,module,exports){
+},{"../config.js":2,"../utils.js":11}],7:[function(require,module,exports){
 var config = require('../config.js');
 
 module.exports = function($scope, $ionicPopup, $http, $state) {
@@ -556,7 +523,7 @@ var parseEmail = function(email) {
     }
     return 0;
 }
-},{"../config.js":2}],7:[function(require,module,exports){
+},{"../config.js":2}],8:[function(require,module,exports){
 //dependencies
 var config = require('../config.js');
 var utils = require('../utils.js');
@@ -639,11 +606,11 @@ var parseEmail = function(email) {
     }
     return 0;
 }
-},{"../config.js":2,"../utils.js":10}],8:[function(require,module,exports){
+},{"../config.js":2,"../utils.js":11}],9:[function(require,module,exports){
 angular.module('ionicApp.services', [])
 //data providers
 .factory('GamesManager', require('./services/gamesmanager.js'))
-},{"./services/gamesmanager.js":9}],9:[function(require,module,exports){
+},{"./services/gamesmanager.js":10}],10:[function(require,module,exports){
 module.exports = function() {
     var games = [];
 
@@ -680,7 +647,7 @@ module.exports = function() {
         }
     }
 }
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = {
     showLoading: function(message, $ionicLoading) {
         $ionicLoading.show({
@@ -690,6 +657,43 @@ module.exports = {
 
     hideLoading: function($ionicLoading) {
         $ionicLoading.hide();
+    },
+    clone: function clone(obj) {
+        if (null == obj || "object" != typeof obj) return obj;
+        var copy = {};
+        if( obj.length !== undefined ) {
+            var arrayCopy = [];
+            for(var i = 0; i < obj.length; i++) {
+                var objInArray = obj[i];
+                if( objInArray.length !== undefined ) {
+                arrayCopy[i] = clone(objInArray);
+                } else {
+                copy = {};
+                for (var attr in objInArray) {
+                    if (objInArray.hasOwnProperty(attr)) {
+                        copy[attr] = clone(objInArray[attr]);
+                    }
+                }
+                arrayCopy[i] = copy;
+                }
+            }
+            return arrayCopy;
+        } else {
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) {
+                    copy[attr] = clone(obj[attr]);
+                }
+            }
+        }
+        return copy;
+    },
+    findIndex: function(array,object) {
+        for(var i = 0; i < array.length; i++) {
+            if( array[i].id === object.id ) {
+            return i;
+            }
+        }
+        return -1;
     }
 };
-},{}]},{},[1,3,8]);
+},{}]},{},[1,3,9]);

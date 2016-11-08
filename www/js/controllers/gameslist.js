@@ -1,10 +1,13 @@
+var utils = require('../utils.js');
+
 module.exports = function(
   $scope,
   $ionicPopup,
   $ionicPopover,
   $ionicModal,
   $ionicListDelegate,
-  $stateParams
+  $stateParams,
+  GamesManager
 ) {
   
   $scope.games = [];
@@ -12,8 +15,6 @@ module.exports = function(
   $scope.currentPlayer = {};
   $scope.numberOfgames = 0;
   $scope.playerId = 0;
-
-  console.log($stateParams);
 
   $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
     scope: $scope
@@ -39,12 +40,6 @@ module.exports = function(
     $scope.gameslist = gameslist; 
   });
 
-  /*$ionicModal.fromTemplateUrl('templates/instructions.html', {
-    scope: $scope
-  }).then(function(instructions) {
-    $scope.instructions = instructions; 
-  });*/
-  
   $ionicModal.fromTemplateUrl('templates/playerslist.html', {
     scope: $scope
   }).then(function(playerslist) {
@@ -106,14 +101,14 @@ module.exports = function(
   }
 
   $scope.editPlayer = function(player) {
-    $scope.currentPlayer = clone(player);
+    $scope.currentPlayer = utils.clone(player);
     $scope.currentGameInstance.lastPlayerAdded = null;
     $scope.createoreditplayer.show();
     $ionicListDelegate.closeOptionButtons();
   }
 
   $scope.deletePlayer = function(player) {
-    var playerIndex = findIndex($scope.currentGameInstance.players,player);
+    var playerIndex = utils.findIndex($scope.currentGameInstance.players,player);
     if( playerIndex === -1 ) {
       return;
     }
@@ -153,7 +148,7 @@ module.exports = function(
       playerObject.id = ++$scope.playerId;
       $scope.currentGameInstance.players.push(playerObject);
     } else {
-      var index = findIndex($scope.currentGameInstance.players, playerObject);
+      var index = utils.findIndex($scope.currentGameInstance.players, playerObject);
       $scope.currentGameInstance.players[index] = playerObject;
     }
     $scope.currentGameInstance.lastPlayerAdded = isNewPlayer ? playerObject : null;
@@ -165,7 +160,7 @@ module.exports = function(
   }
 
   $scope.deleteGame = function(game) {
-    var gameIndex = findIndex($scope.games,game);
+    var gameIndex = utils.findIndex($scope.games,game);
     if( gameIndex === -1 ) {
       return;
     }
@@ -180,13 +175,13 @@ module.exports = function(
   }
 
   $scope.editGame = function(game) {
-    $scope.currentGameInstance = clone(game);
+    $scope.currentGameInstance = utils.clone(game);
     $scope.createoreditgame.show();
     $ionicListDelegate.closeOptionButtons();
   }
 
   $scope.duplicateGame = function() {
-    var newInstance = clone($scope.currentGameInstance);
+    var newInstance = utils.clone($scope.currentGameInstance);
     if( erroCheckingGame(newInstance, $ionicPopup, $scope.games) < 0 ) {
       return;
     }
@@ -218,7 +213,7 @@ module.exports = function(
       gameInstance.lastPlayerAdded = null;
       $scope.games.push(gameInstance);
     } else {
-      var index = findIndex($scope.games,gameInstance);
+      var index = utils.findIndex($scope.games,gameInstance);
       $scope.games[index] = gameInstance;
     }
 
@@ -351,42 +346,4 @@ var parseRating = function(possibleNumber) {
   return !isNaN(possibleNumber) && floatVar >= 0 && floatVar <=10 ? floatVar.toFixed(2) : null;
 }
 
-var findIndex = function(array,object) {
-  for(var i = 0; i < array.length; i++) {
-    if( array[i].id === object.id ) {
-      return i;
-    }
-  }
-  return -1;
-}
 
-//common util
-var clone = function clone(obj) {
-  if (null == obj || "object" != typeof obj) return obj;
-  var copy = {};
-  if( obj.length !== undefined ) {
-    var arrayCopy = [];
-    for(var i = 0; i < obj.length; i++) {
-      var objInArray = obj[i];
-      if( objInArray.length !== undefined ) {
-        arrayCopy[i] = clone(objInArray);
-      } else {
-        copy = {};
-        for (var attr in objInArray) {
-          if (objInArray.hasOwnProperty(attr)) {
-              copy[attr] = clone(objInArray[attr]);
-            }
-        }
-        arrayCopy[i] = copy;
-      }
-    }
-    return arrayCopy;
-  } else {
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) {
-          copy[attr] = clone(obj[attr]);
-        }
-    }
-  }
-  return copy;
-}
