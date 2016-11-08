@@ -2,6 +2,9 @@ module.exports = function() {
     var games = [];
 
     return {
+        set: function(allGames) {
+            games = allGames;
+        },
         all: function() {
             return games;
         },

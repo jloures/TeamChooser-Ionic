@@ -15,11 +15,29 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     templateUrl: 'templates/gameslist.html',
     controller: 'GamesList'
   })
+  .state('playerslist', {
+    url: '/:userId/gameslist/:gameId/playerslist',
+    cache: false,
+    templateUrl: 'templates/playerslist.html',
+    controller: 'PlayersList'
+  })
+  .state('teamlist', {
+    url: '/:userId/gameslist/:gameId/teamlist',
+    cache: false,
+    templateUrl: 'templates/teamlist.html',
+    controller: 'TeamList'
+  })
   .state('createoreditgame', {
     url: '/:userId/createoreditgame',
     cache: false,
     templateUrl: 'templates/createoreditgame.html',
     controller: 'CreateOrEditGame'
+  })
+  .state('createoreditplayer', {
+    url: '/:userId/createoreditplayer/:playerId',
+    cache: false,
+    templateUrl: 'templates/createoreditplayer.html',
+    controller: 'CreateOrEditPlayer'
   })
   .state('signup', {
     url: '/signup',

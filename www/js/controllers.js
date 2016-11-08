@@ -1,7 +1,10 @@
 angular.module('ionicApp.controllers', [])
 //controllers
 .controller('CreateOrEditGame', require('./controllers/createoreditgame.js'))
+.controller('CreateOrEditPlayer', require('./controllers/createoreditplayer.js'))
 .controller('GamesList', require('./controllers/gameslist.js'))
 .controller('LoginCtrl', require('./controllers/login.js'))
 .controller('PassRecoveryCtrl', require('./controllers/passrecovery.js'))
+.controller('PlayersList', require('./controllers/playerslist.js'))
 .controller('SignUpCtrl', require('./controllers/signup.js'))
+.controller('TeamList', require('./controllers/teamlist.js'))

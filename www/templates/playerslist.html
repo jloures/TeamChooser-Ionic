@@ -3,17 +3,17 @@
         <button class="button button-clear button-primary" ng-click="returnToGameList()">
             <i class="ion-arrow-left-c"></i> Game List
         </button>
-        <h1 class="title">{{currentGameInstance.gameName}}</h1>
+        <h1 class="title">{{gameName}}</h1>
         <button class="button button-icon button-primary ion-gear-a" ng-click="openPlayerListActions($event)"></button>
     </ion-header-bar>
     <ion-content class="has-footer">
         <div ng-if="currentGameInstance.selectedPlayers > 0">
             <div class="last-player-added">
-                {{currentGameInstance.selectedPlayers}} player(s) selected (D:{{currentGameInstance.defensePlayers}} O:{{currentGameInstance.offensePlayers}})
+                {{selectedPlayers}} player(s) selected (D:{{defensePlayers}} O:{{offensePlayers}})
             </div>
         </div>
         <ion-list>          
-            <ion-item ng-click="selectPlayer(player)" ng-repeat="player in currentGameInstance.players track by $index" >
+            <ion-item ng-click="toggleSelection(player)" ng-repeat="player in players track by $index" >
                 <div class="player-item-players-list">
                     <b>{{player.name}}</b>
                     <div class="player-attribute-players-list">

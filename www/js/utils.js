@@ -40,7 +40,7 @@ module.exports = {
     findIndex: function(array,object) {
         for(var i = 0; i < array.length; i++) {
             if( array[i].id === object.id ) {
-            return i;
+                return i;
             }
         }
         return -1;
