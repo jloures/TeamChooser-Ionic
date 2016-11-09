@@ -2,7 +2,7 @@
 var config = require('../config.js');
 var utils = require('../utils.js');
 
-module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading) {
+module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading, GamesManager) {
     
     $scope.goToSignUp = function() {
         $state.go('signup');
@@ -31,8 +31,9 @@ module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading) {
             //hide the loading 
             utils.hideLoading($ionicLoading);
             //call the service here to set gameInstances
+            GamesManager.set(res.data.allGames);
             //userId should come from response
-            $state.go('gameslist', {userId: 0});
+            $state.go('gameslist', {userId: res.data.userId});
         }, function(err){
             utils.hideLoading($ionicLoading);
             $ionicPopup.alert({

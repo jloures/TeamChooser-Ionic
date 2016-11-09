@@ -7,7 +7,7 @@
         <button class="button button-icon button-primary ion-gear-a" ng-click="openPlayerListActions($event)"></button>
     </ion-header-bar>
     <ion-content class="has-footer">
-        <div ng-if="currentGameInstance.selectedPlayers > 0">
+        <div ng-if="selectedPlayers > 0">
             <div class="last-player-added">
                 {{selectedPlayers}} player(s) selected (D:{{defensePlayers}} O:{{offensePlayers}})
             </div>

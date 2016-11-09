@@ -11,8 +11,7 @@ module.exports = function(
   GamesManager
 ) {
 
-    //remove this once you get these from the server
-    $scope.playerId = 0;
+    //controller variables
     $scope.lastPlayerAdded = null;
     $scope.players = PlayersManager.all();
     if( $stateParams.playerId != null ) {
@@ -45,13 +44,44 @@ module.exports = function(
         //verify pre-assign
         playerObject.team = playerObject.preassign ? playerObject.team : null;
         if( isNewPlayer ) {
-            //make api call here
-            playerObject.id = ++$scope.playerId;
-            PlayersManager.add(playerObject);
+            //make post to create player
+            utils.showLoading("Creating Player...", $ionicLoading);
+            $http.post(
+                // /:userId/:gameId/createplayer POST returns id of player
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/createplayer',
+                playerObject
+            ).then(function(res){
+                playerObject.id = res.data.id;
+                PlayersManager.add(playerObject);
+            }, function(err){
+                $ionicPopup.alert({
+                    title: 'Error',
+                    template: err.data
+                });
+            }).finally(function(){
+                utils.hideLoading($ionicLoading);
+                fixState(isNewPlayer, playerObject);
+            });
         } else {
-            //make an api call here
-            PlayersManager.edit(playerObject);
+            $http.post(
+                // /:userId/:gameId/:playerId PUT returns
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id
+                playerObject
+            ).then(function(res){
+                PlayersManager.edit(playerObject);
+            }, function(err){
+                $ionicPopup.alert({
+                    title: 'Error',
+                    template: err.data
+                });
+            }).finally(function(){
+                utils.hideLoading($ionicLoading);
+                fixState(isNewPlayer, playerObject);
+            });
         }
+    }
+
+    var fixState = function(isNewPlayer, playerObject) {
         $scope.lastPlayerAdded = isNewPlayer ? playerObject : null;
         $scope.currentPlayer = {};
         if( !isNewPlayer ) {

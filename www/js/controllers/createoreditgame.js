@@ -1,14 +1,17 @@
 var utils = require('../utils.js');
+var config = require('../config.js');
 
 module.exports = function(
-  $scope,
-  $state,
-  $ionicPopup,
-  $ionicPopover,
-  $ionicModal,
-  $ionicListDelegate,
-  $stateParams,
-  GamesManager
+    $http,
+    $scope,
+    $state,
+    $ionicPopup,
+    $ionicPopover,
+    $ionicLoading,
+    $ionicModal,
+    $ionicListDelegate,
+    $stateParams,
+    GamesManager
 ) {
 
     $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
@@ -17,9 +20,24 @@ module.exports = function(
     }
 
     $scope.exitCreateOrEditGamePage = function() {
-        //go back to games list
-        //make api call to get all the games
-       $state.go('gameslist', {userId: $stateParams.userId});
+        // start the loading page
+        utils.showLoading("Loading...", $ionicLoading);
+        //API to get all games
+        $http.get(
+            // :userId/allgames GET
+            config.endpoint + '/' + $stateParams.userId + '/allgames'
+        ).then(function(res){
+            utils.hideLoading($ionicLoading);
+            //set all game instances
+            GamesManager.set(res.data.allGames);
+            $state.go('gameslist', {userId: $stateParams.userId});
+        }, function(err){
+            utils.hideLoading($ionicLoading);
+            $ionicPopup.alert({
+                title: 'Error',
+                template: err.data
+            });
+        });
     }
 
     $scope.duplicateGame = function() {
@@ -28,7 +46,23 @@ module.exports = function(
             return;
         }
         //make api call here to duplicate
-        $state.go('gameslist', {userId: $stateParams.userId});
+        utils.showLoading("Creating Game...", $ionicLoading);
+        $http.post(
+            // /:userId/creategame POST returns id (gamesInstance.id)
+            config.endpoint + '/' + $stateParams.userId + '/creategame',
+            gameInstance
+        ).then(function(res){
+            gameInstance.id = res.data.id;
+            GamesManager.add(gameInstance);
+            $state.go('gameslist', {userId: $stateParams.userId});
+        }, function(err){
+            $ionicPopup.alert({
+                title: 'Error',
+                template: err.data
+            });
+        }).finally(function(){
+            utils.hideLoading($ionicLoading);
+        });
     }
 
     $scope.createOrEditGame = function() {
@@ -42,11 +76,41 @@ module.exports = function(
         gameInstance.hasBODRatings = gameInstance.hasSuperOptimizer && gameInstance.hasBODRatings;
         if( isNewGame ) {
             //make post to create game
+            utils.showLoading("Creating Game...", $ionicLoading);
+            $http.post(
+                // /:userId/creategame POST returns id (gamesInstance.id)
+                config.endpoint + '/' + $stateParams.userId + '/creategame',
+                gameInstance
+            ).then(function(res){
+                gameInstance.id = res.data.id;
+                GamesManager.add(gameInstance);
+                $state.go('gameslist', {userId: $stateParams.userId});
+            }, function(err){
+                $ionicPopup.alert({
+                    title: 'Error',
+                    template: err.data
+                });
+            }).finally(function(){
+                utils.hideLoading($ionicLoading);
+            });
         } else {
-            //make a put to update game info
+            utils.showLoading("Updating Game...", $ionicLoading);
+            $http.put(
+                // /:userId/:gameId PUT
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId,
+                gameInstance
+            ).then(function(res){
+                GamesManager.edit(gameInstance);
+                $state.go('gameslist', {userId: $stateParams.userId});
+            }, function(err){
+                $ionicPopup.alert({
+                    title: 'Error',
+                    template: err.data
+                });
+            }).finally(function(){
+                utils.hideLoading($ionicLoading);
+            });
         }
-        //dont forget to put this inside .then for each post and put
-        $state.go('gameslist', {userId: $stateParams.userId});
     }   
 }
 
@@ -59,22 +123,6 @@ var erroCheckingGame = function(game, $ionicPopup, games) {
       });
       return -1;
     }
-
-  var hasFoundDuplicate = false;
-  for(var i =0; i < games.length; i++) {
-    if( games[i].gameName === game.gameName ) {
-      hasFoundDuplicate = true;
-      break;
-    }
-  }
-
-  if( hasFoundDuplicate ) {
-    $ionicPopup.alert({
-      title: 'Error',
-      template: 'Game with the same name already exists!'
-    });
-    return -1;
-  }
 
     if( game.teamA === undefined || game.teamA.name === undefined || game.teamA.name.trim() === "") {
       $ionicPopup.alert({

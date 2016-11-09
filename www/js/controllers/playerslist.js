@@ -1,6 +1,7 @@
 var utils = require('../utils.js');
 
 module.exports = function(
+  $http,
   $scope,
   $state,
   $ionicPopup,
@@ -41,7 +42,24 @@ module.exports = function(
 
     //return to gameslist
     $scope.returnToGameList = function() {
-        $state.go('gameslist', { userId: $stateParams.userId });
+        // start the loading page
+        utils.showLoading("Syncing...", $ionicLoading);
+        //API to get all games
+        $http.get(
+            // :userId/allgames GET
+            config.endpoint + '/' + $stateParams.userId + '/allgames'
+        ).then(function(res){
+            utils.hideLoading($ionicLoading);
+            //set all game instances
+            GamesManager.set(res.data.allGames);
+            $state.go('gameslist', {userId: $stateParams.userId});
+        }, function(err){
+            utils.hideLoading($ionicLoading);
+            $ionicPopup.alert({
+                title: 'Error',
+                template: err.data
+            });
+        });
     }
 
     //open and close popover
@@ -75,22 +93,21 @@ module.exports = function(
     }
 
     $scope.deletePlayer = function(player) {
-        var playerIndex = utils.findIndex($scope.players,player);
-        if( playerIndex === -1 ) {
-            return;
-        }
-        var players = $scope.currentGameInstance.players;
-        if( player.isSelected ) {
-            $scope.currentGameInstance.selectedPlayers--;
-        }
-        players.splice(playerIndex, 1);
-        if( players.length !== 0 ) {
-            $scope.lastPlayerAdded = players[players.length -1];
-        } else {
-            $scope.currentGameInstance.lastPlayerAdded = null;
-        }
-        $scope.recalculatePlayerTypes();
-        $ionicListDelegate.closeOptionButtons();
+        //make api call here for deleting player
+        utils.showLoading("Deleting Player...", $ionicLoading);
+        $http.delete(
+        // /:userId/:gameId/:playerId DEL
+        config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + player.id
+        ).then(function(res){
+            deletePlayer(player);
+        },function(err){
+            $ionicPopup.alert({
+                title: 'Error',
+                template: err.data
+            });
+        }).finally(function(){
+            utils.hideLoading($ionicLoading);
+        });
     }
 
     $scope.setIsSelectedBoolean = function(booleanValue) {
@@ -126,17 +143,36 @@ module.exports = function(
     }
 
     $scope.recalculatePlayerTypes = function() {
-        var players = $scope.currentGameInstance.players;
-        $scope.currentGameInstance.offensePlayers = 0;
-        $scope.currentGameInstance.defensePlayers = 0;
+        var players = $scope.players;
+        $scope.offensePlayers = 0;
+        $scope.defensePlayers = 0;
         for(var i = 0; i < players.length; i++) {
             if( players[i].isSelected ) {
                 if( players[i].type === 'Offense' ) {
-                    $scope.currentGameInstance.offensePlayers++;
+                    $scope.offensePlayers++;
                 } else if( players[i].type === 'Defense' ) {
-                    $scope.currentGameInstance.defensePlayers++;
+                    $scope.defensePlayers++;
                 }
             }
         }
+    }
+
+    var deletePlayer = function(player) {
+        var playerIndex = utils.findIndex($scope.players,player);
+        if( playerIndex === -1 ) {
+            return;
+        }
+        var players = $scope.players;
+        if( player.isSelected ) {
+            $scope.selectedPlayers--;
+        }
+        players.splice(playerIndex, 1);
+        if( players.length !== 0 ) {
+            $scope.lastPlayerAdded = players[players.length -1];
+        } else {
+            $scope.lastPlayerAdded = null;
+        }
+        $scope.recalculatePlayerTypes();
+        $ionicListDelegate.closeOptionButtons();
     }
 }
