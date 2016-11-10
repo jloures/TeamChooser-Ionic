@@ -14,14 +14,14 @@ module.exports = function(
     GamesManager
 ) {
 
-    $scope.currentGameInstance = {teamA:{name:"Light"},teamB:{name:"Dark"}};
-    if( $stateParams.gameId != null ) {
-        $scope.currentGameInstance = GamesManager.get($stateParams.gameId);
+    $scope.currentGameInstance = utils.defaultGame;
+    if( $stateParams.gameId != "-1" ) {
+        $scope.currentGameInstance = GamesManager.getCurrent();
     }
 
     $scope.exitCreateOrEditGamePage = function() {
         // start the loading page
-        utils.showLoading("Loading...", $ionicLoading);
+        utils.showLoading("Syncing Games...", $ionicLoading);
         //API to get all games
         $http.get(
             // :userId/allgames GET
@@ -46,14 +46,15 @@ module.exports = function(
             return;
         }
         //make api call here to duplicate
-        utils.showLoading("Creating Game...", $ionicLoading);
+        utils.showLoading("Duplicating Game...", $ionicLoading);
+        //will need to change this once you have the players too
         $http.post(
             // /:userId/creategame POST returns id (gamesInstance.id)
             config.endpoint + '/' + $stateParams.userId + '/creategame',
-            gameInstance
+            newInstance
         ).then(function(res){
-            gameInstance.id = res.data.id;
-            GamesManager.add(gameInstance);
+            newInstance.id = res.data.id;
+            GamesManager.add(newInstance);
             $state.go('gameslist', {userId: $stateParams.userId});
         }, function(err){
             $ionicPopup.alert({
@@ -67,7 +68,7 @@ module.exports = function(
 
     $scope.createOrEditGame = function() {
         var gameInstance = $scope.currentGameInstance;
-        var isNewGame = gameInstance.id === undefined;
+        var isNewGame = gameInstance.id === null || gameInstance.id === undefined;
         //error checking right here
         if( erroCheckingGame(gameInstance, $ionicPopup, GamesManager.all()) < 0 ) {
             return;
@@ -97,7 +98,7 @@ module.exports = function(
             utils.showLoading("Updating Game...", $ionicLoading);
             $http.put(
                 // /:userId/:gameId PUT
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId,
+                config.endpoint + '/' + $stateParams.userId + '/' + gameInstance.id,
                 gameInstance
             ).then(function(res){
                 GamesManager.edit(gameInstance);

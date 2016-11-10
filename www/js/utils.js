@@ -44,5 +44,6 @@ module.exports = {
             }
         }
         return -1;
-    }
+    },
+    defaultGame: {teamA:{name:"Light"},teamB:{name:"Dark"}}
 };

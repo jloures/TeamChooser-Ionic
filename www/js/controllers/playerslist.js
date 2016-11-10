@@ -31,6 +31,7 @@ module.exports = function(
     $scope.showTeamList = function() {
         //will need to change this once assignment 
         //gets proper
+        //MILESTONE 6
         $state.go(
             'teamlist', 
             { 

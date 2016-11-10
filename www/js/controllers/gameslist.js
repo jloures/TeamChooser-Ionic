@@ -7,6 +7,7 @@ module.exports = function(
   $state,
   $ionicPopup,
   $ionicPopover,
+  $ionicLoading,
   $ionicModal,
   $ionicListDelegate,
   $stateParams,
@@ -48,7 +49,7 @@ module.exports = function(
       'createoreditgame',
       {
           userId: $stateParams.userId,
-          gameId: null
+          gameId: -1
       }
     )
   }
@@ -77,12 +78,27 @@ module.exports = function(
   }
 
   $scope.editGame = function(game) {
-    $state.go(
-      'createoreditgame',
-      {
-          userId: $stateParams.userId,
-          gameId: game.id
-      }
-    )
+    //make api call here to delete game then execute the code
+    utils.showLoading("Loading Game Info...", $ionicLoading);
+    $http.get(
+      // /:userId/:gameId GET
+      config.endpoint + '/' + $stateParams.userId + '/' + game.id
+    ).then(function(res){
+      GamesManager.setCurrent(res.data.game);
+      $state.go(
+        'createoreditgame',
+        {
+            userId: $stateParams.userId,
+            gameId: game.id
+        }
+      )
+    },function(err){
+        $ionicPopup.alert({
+            title: 'Error',
+            template: err.data
+        });
+    }).finally(function(){
+        utils.hideLoading($ionicLoading);
+    });
   }
 }

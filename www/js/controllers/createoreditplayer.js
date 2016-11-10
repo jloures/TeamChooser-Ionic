@@ -65,7 +65,7 @@ module.exports = function(
         } else {
             $http.post(
                 // /:userId/:gameId/:playerId PUT returns
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id,
                 playerObject
             ).then(function(res){
                 PlayersManager.edit(playerObject);
