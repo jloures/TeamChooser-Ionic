@@ -1,6 +1,6 @@
 module.exports = function() {
     var games = [];
-    var curr = {};
+    var currentGame = {};
 
     return {
         set: function(allGames) {
