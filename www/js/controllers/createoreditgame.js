@@ -14,7 +14,8 @@ module.exports = function(
     GamesManager
 ) {
 
-    $scope.currentGameInstance = utils.defaultGame;
+    $scope.currentGameInstance = utils.defaultGame();
+    console.log($scope.currentGameInstance);
     if( $stateParams.gameId != "-1" ) {
         $scope.currentGameInstance = GamesManager.getCurrent();
     }

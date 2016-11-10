@@ -49,7 +49,7 @@ module.exports = function(
       'createoreditgame',
       {
           userId: $stateParams.userId,
-          gameId: -1
+          gameId: "-1"
       }
     )
   }

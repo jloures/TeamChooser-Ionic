@@ -90,7 +90,8 @@ module.exports = function(
     GamesManager
 ) {
 
-    $scope.currentGameInstance = utils.defaultGame;
+    $scope.currentGameInstance = utils.defaultGame();
+    console.log($scope.currentGameInstance);
     if( $stateParams.gameId != "-1" ) {
         $scope.currentGameInstance = GamesManager.getCurrent();
     }
@@ -431,7 +432,7 @@ module.exports = function(
       'createoreditgame',
       {
           userId: $stateParams.userId,
-          gameId: -1
+          gameId: "-1"
       }
     )
   }
@@ -873,7 +874,7 @@ angular.module('ionicApp.services', [])
 },{"./services/gamesmanager.js":13,"./services/playersmanager.js":14}],13:[function(require,module,exports){
 module.exports = function() {
     var games = [];
-    var curr = {};
+    var currentGame = {};
 
     return {
         set: function(allGames) {
@@ -1005,6 +1006,8 @@ module.exports = {
         }
         return -1;
     },
-    defaultGame: {teamA:{name:"Light"},teamB:{name:"Dark"}}
+    defaultGame: function(){
+        return this.clone({teamA:{name:"Light"},teamB:{name:"Dark"}});
+    }
 };
 },{}]},{},[3,12,1]);

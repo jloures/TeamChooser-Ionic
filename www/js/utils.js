@@ -45,5 +45,7 @@ module.exports = {
         }
         return -1;
     },
-    defaultGame: {teamA:{name:"Light"},teamB:{name:"Dark"}}
+    defaultGame: function(){
+        return this.clone({teamA:{name:"Light"},teamB:{name:"Dark"}});
+    }
 };
