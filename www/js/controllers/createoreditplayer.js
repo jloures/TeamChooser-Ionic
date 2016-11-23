@@ -1,7 +1,11 @@
 var utils = require('../utils.js');
+var config = require('../config.js');
 
 module.exports = function(
+  $http,
   $scope,
+  $state,
+  $ionicLoading,
   $ionicPopup,
   $ionicPopover,
   $ionicModal,
@@ -12,17 +16,19 @@ module.exports = function(
 ) {
 
     //controller variables
-    $scope.lastPlayerAdded = null;
+    $scope.gameInstance = GamesManager.get($stateParams.gameId);
     $scope.players = PlayersManager.all();
-    if( $stateParams.playerId != null ) {
-        $scope.currentPlayer = PlayersManager.get($stateParams.playerId);
+    $scope.lastPlayerAdded = null;
+
+    if( $stateParams.playerId != "-1" ) {
+        $scope.currentPlayer = utils.clone(PlayersManager.get($stateParams.playerId));
     } else {
         $scope.currentPlayer = {};
     }
-    $scope.gameInstance = GamesManager.get($stateParams.gameId);
 
     //go back to the players list page
     $scope.closeCreateOrEditPage = function() {
+        //change this to go back to a list of players
         $state.go(
             'playerslist', 
             { 
@@ -48,11 +54,12 @@ module.exports = function(
             utils.showLoading("Creating Player...", $ionicLoading);
             $http.post(
                 // /:userId/:gameId/createplayer POST returns id of player
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/createplayer',
+                config.endpoint + '/' + $stateParams.userId + '/createplayer',
                 playerObject
             ).then(function(res){
                 playerObject.id = res.data.id;
                 PlayersManager.add(playerObject);
+                fixState(isNewPlayer, playerObject);
             }, function(err){
                 $ionicPopup.alert({
                     title: 'Error',
@@ -60,15 +67,15 @@ module.exports = function(
                 });
             }).finally(function(){
                 utils.hideLoading($ionicLoading);
-                fixState(isNewPlayer, playerObject);
             });
         } else {
-            $http.post(
-                // /:userId/:gameId/:playerId PUT returns
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id,
+            $http.put(
+                // /:userId/:playerId PUT
+                config.endpoint + '/' + $stateParams.userId + '/' + playerObject.id + '/updateplayer',
                 playerObject
             ).then(function(res){
                 PlayersManager.edit(playerObject);
+                fixState(isNewPlayer, playerObject);
             }, function(err){
                 $ionicPopup.alert({
                     title: 'Error',
@@ -76,8 +83,23 @@ module.exports = function(
                 });
             }).finally(function(){
                 utils.hideLoading($ionicLoading);
-                fixState(isNewPlayer, playerObject);
             });
+        }
+    }
+
+    //TODO remove duplicated code
+    $scope.recalculatePlayerTypes = function() {
+        var players = $scope.players;
+        $scope.offensePlayers = 0;
+        $scope.defensePlayers = 0;
+        for(var i = 0; i < players.length; i++) {
+            if( players[i].isSelected ) {
+                if( players[i].type === 'Offense' ) {
+                    $scope.offensePlayers++;
+                } else if( players[i].type === 'Defense' ) {
+                    $scope.defensePlayers++;
+                }
+            }
         }
     }
 

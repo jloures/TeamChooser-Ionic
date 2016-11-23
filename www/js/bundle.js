@@ -35,7 +35,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     controller: 'CreateOrEditGame'
   })
   .state('createoreditplayer', {
-    url: '/:userId/createoreditplayer/:playerId',
+    url: '/:userId/:gameId/createoreditplayer/:playerId',
     cache: false,
     templateUrl: 'templates/createoreditplayer.html',
     controller: 'CreateOrEditPlayer'
@@ -58,7 +58,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
 
 },{}],2:[function(require,module,exports){
 module.exports = {
-    endpoint: "https://teammaker.herokuapp.com"
+    endpoint: ""
 }
 
 },{}],3:[function(require,module,exports){
@@ -229,9 +229,13 @@ var erroCheckingGame = function(game, $ionicPopup, games) {
 
 },{"../config.js":2,"../utils.js":15}],5:[function(require,module,exports){
 var utils = require('../utils.js');
+var config = require('../config.js');
 
 module.exports = function(
+  $http,
   $scope,
+  $state,
+  $ionicLoading,
   $ionicPopup,
   $ionicPopover,
   $ionicModal,
@@ -242,17 +246,19 @@ module.exports = function(
 ) {
 
     //controller variables
-    $scope.lastPlayerAdded = null;
+    $scope.gameInstance = GamesManager.get($stateParams.gameId);
     $scope.players = PlayersManager.all();
-    if( $stateParams.playerId != null ) {
-        $scope.currentPlayer = PlayersManager.get($stateParams.playerId);
+    $scope.lastPlayerAdded = null;
+
+    if( $stateParams.playerId != "-1" ) {
+        $scope.currentPlayer = utils.clone(PlayersManager.get($stateParams.playerId));
     } else {
         $scope.currentPlayer = {};
     }
-    $scope.gameInstance = GamesManager.get($stateParams.gameId);
 
     //go back to the players list page
     $scope.closeCreateOrEditPage = function() {
+        //change this to go back to a list of players
         $state.go(
             'playerslist', 
             { 
@@ -278,11 +284,12 @@ module.exports = function(
             utils.showLoading("Creating Player...", $ionicLoading);
             $http.post(
                 // /:userId/:gameId/createplayer POST returns id of player
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/createplayer',
+                config.endpoint + '/' + $stateParams.userId + '/createplayer',
                 playerObject
             ).then(function(res){
                 playerObject.id = res.data.id;
                 PlayersManager.add(playerObject);
+                fixState(isNewPlayer, playerObject);
             }, function(err){
                 $ionicPopup.alert({
                     title: 'Error',
@@ -290,15 +297,15 @@ module.exports = function(
                 });
             }).finally(function(){
                 utils.hideLoading($ionicLoading);
-                fixState(isNewPlayer, playerObject);
             });
         } else {
-            $http.post(
-                // /:userId/:gameId/:playerId PUT returns
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id,
+            $http.put(
+                // /:userId/:playerId PUT
+                config.endpoint + '/' + $stateParams.userId + '/' + playerObject.id + '/updateplayer',
                 playerObject
             ).then(function(res){
                 PlayersManager.edit(playerObject);
+                fixState(isNewPlayer, playerObject);
             }, function(err){
                 $ionicPopup.alert({
                     title: 'Error',
@@ -306,8 +313,23 @@ module.exports = function(
                 });
             }).finally(function(){
                 utils.hideLoading($ionicLoading);
-                fixState(isNewPlayer, playerObject);
             });
+        }
+    }
+
+    //TODO remove duplicated code
+    $scope.recalculatePlayerTypes = function() {
+        var players = $scope.players;
+        $scope.offensePlayers = 0;
+        $scope.defensePlayers = 0;
+        for(var i = 0; i < players.length; i++) {
+            if( players[i].isSelected ) {
+                if( players[i].type === 'Offense' ) {
+                    $scope.offensePlayers++;
+                } else if( players[i].type === 'Defense' ) {
+                    $scope.defensePlayers++;
+                }
+            }
         }
     }
 
@@ -380,7 +402,7 @@ var parseRating = function(possibleNumber) {
     var floatVar = parseFloat(possibleNumber);
     return !isNaN(possibleNumber) && floatVar >= 0 && floatVar <=10 ? floatVar.toFixed(2) : null;
 }
-},{"../utils.js":15}],6:[function(require,module,exports){
+},{"../config.js":2,"../utils.js":15}],6:[function(require,module,exports){
 var utils = require('../utils.js');
 var config = require('../config.js');
 
@@ -602,6 +624,7 @@ var parseEmail = function(email) {
 }
 },{"../config.js":2}],9:[function(require,module,exports){
 var utils = require('../utils.js');
+var config = require('../config.js');
 
 module.exports = function(
   $http,
@@ -676,28 +699,33 @@ module.exports = function(
 
     //player data manipulation
     $scope.addPlayer = function() {
+        $scope.closePlayerListActions();
         $state.go(
             'createoreditplayer',
             {
                 userId: $stateParams.userId,
-                playerId: null //new player
+                playerId: "-1", //new player
+                gameId: $stateParams.gameId
             }
         )
     }
 
     $scope.editPlayer = function(player) {
         //just go to createoreditplayer with a known player Id
+        $scope.closePlayerListActions();
         $state.go(
             'createoreditplayer',
             {
                 userId: $stateParams.userId,
-                playerId: player.id
+                playerId: player.id, 
+                gameId: $stateParams.gameId
             }
         )
     }
 
     $scope.deletePlayer = function(player) {
         //make api call here for deleting player
+        $scope.closePlayerListActions();
         utils.showLoading("Deleting Player...", $ionicLoading);
         $http.delete(
         // /:userId/:gameId/:playerId DEL
@@ -715,6 +743,7 @@ module.exports = function(
     }
 
     $scope.setIsSelectedBoolean = function(booleanValue) {
+        $scope.closePlayerListActions();
         var players = $scope.players;
         for( var i = 0; i < players.length; i++ ) {
             var player = players[i];
@@ -732,6 +761,7 @@ module.exports = function(
     }
 
     $scope.recalculatePlayerTypes = function() {
+        $scope.closePlayerListActions();
         var players = $scope.players;
         $scope.offensePlayers = 0;
         $scope.defensePlayers = 0;
@@ -747,6 +777,7 @@ module.exports = function(
     }
 
     $scope.recalculatePlayerTypes = function() {
+        $scope.closePlayerListActions();
         var players = $scope.players;
         $scope.offensePlayers = 0;
         $scope.defensePlayers = 0;
@@ -781,7 +812,7 @@ module.exports = function(
     }
 }
 
-},{"../utils.js":15}],10:[function(require,module,exports){
+},{"../config.js":2,"../utils.js":15}],10:[function(require,module,exports){
 //dependencies
 var config = require('../config.js');
 var utils = require('../utils.js');

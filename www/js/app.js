@@ -34,7 +34,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     controller: 'CreateOrEditGame'
   })
   .state('createoreditplayer', {
-    url: '/:userId/createoreditplayer/:playerId',
+    url: '/:userId/:gameId/createoreditplayer/:playerId',
     cache: false,
     templateUrl: 'templates/createoreditplayer.html',
     controller: 'CreateOrEditPlayer'

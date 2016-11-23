@@ -1,4 +1,5 @@
 var utils = require('../utils.js');
+var config = require('../config.js');
 
 module.exports = function(
   $http,
@@ -73,28 +74,33 @@ module.exports = function(
 
     //player data manipulation
     $scope.addPlayer = function() {
+        $scope.closePlayerListActions();
         $state.go(
             'createoreditplayer',
             {
                 userId: $stateParams.userId,
-                playerId: null //new player
+                playerId: "-1", //new player
+                gameId: $stateParams.gameId
             }
         )
     }
 
     $scope.editPlayer = function(player) {
         //just go to createoreditplayer with a known player Id
+        $scope.closePlayerListActions();
         $state.go(
             'createoreditplayer',
             {
                 userId: $stateParams.userId,
-                playerId: player.id
+                playerId: player.id, 
+                gameId: $stateParams.gameId
             }
         )
     }
 
     $scope.deletePlayer = function(player) {
         //make api call here for deleting player
+        $scope.closePlayerListActions();
         utils.showLoading("Deleting Player...", $ionicLoading);
         $http.delete(
         // /:userId/:gameId/:playerId DEL
@@ -112,6 +118,7 @@ module.exports = function(
     }
 
     $scope.setIsSelectedBoolean = function(booleanValue) {
+        $scope.closePlayerListActions();
         var players = $scope.players;
         for( var i = 0; i < players.length; i++ ) {
             var player = players[i];
@@ -129,6 +136,7 @@ module.exports = function(
     }
 
     $scope.recalculatePlayerTypes = function() {
+        $scope.closePlayerListActions();
         var players = $scope.players;
         $scope.offensePlayers = 0;
         $scope.defensePlayers = 0;
@@ -144,6 +152,7 @@ module.exports = function(
     }
 
     $scope.recalculatePlayerTypes = function() {
+        $scope.closePlayerListActions();
         var players = $scope.players;
         $scope.offensePlayers = 0;
         $scope.defensePlayers = 0;
