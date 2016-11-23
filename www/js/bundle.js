@@ -91,7 +91,6 @@ module.exports = function(
 ) {
 
     $scope.currentGameInstance = utils.defaultGame();
-    console.log($scope.currentGameInstance);
     if( $stateParams.gameId != "-1" ) {
         $scope.currentGameInstance = GamesManager.getCurrent();
     }
@@ -118,7 +117,7 @@ module.exports = function(
     }
 
     $scope.duplicateGame = function() {
-        var newInstance = $scope.currentGameInstance;
+        var newInstance = utils.clone($scope.currentGameInstance);
         if( erroCheckingGame(newInstance, $ionicPopup, GamesManager.all()) < 0 ) {
             return;
         }
@@ -126,8 +125,8 @@ module.exports = function(
         utils.showLoading("Duplicating Game...", $ionicLoading);
         //will need to change this once you have the players too
         $http.post(
-            // /:userId/creategame POST returns id (gamesInstance.id)
-            config.endpoint + '/' + $stateParams.userId + '/creategame',
+            // /:userId/duplicategame POST returns id (gamesInstance.id)
+            config.endpoint + '/' + $stateParams.userId + '/duplicategame',
             newInstance
         ).then(function(res){
             newInstance.id = res.data.id;
@@ -175,7 +174,7 @@ module.exports = function(
             utils.showLoading("Updating Game...", $ionicLoading);
             $http.put(
                 // /:userId/:gameId PUT
-                config.endpoint + '/' + $stateParams.userId + '/' + gameInstance.id,
+                config.endpoint + '/' + $stateParams.userId + '/' + gameInstance.id + '/updategame',
                 gameInstance
             ).then(function(res){
                 GamesManager.edit(gameInstance);
@@ -279,12 +278,13 @@ module.exports = function(
         }
         //verify pre-assign
         playerObject.team = playerObject.preassign ? playerObject.team : null;
+        var request;
         if( isNewPlayer ) {
             //make post to create player
             utils.showLoading("Creating Player...", $ionicLoading);
-            $http.post(
+            request = $http.post(
                 // /:userId/:gameId/createplayer POST returns id of player
-                config.endpoint + '/' + $stateParams.userId + '/createplayer',
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/createplayer',
                 playerObject
             ).then(function(res){
                 playerObject.id = res.data.id;
@@ -299,7 +299,7 @@ module.exports = function(
                 utils.hideLoading($ionicLoading);
             });
         } else {
-            $http.put(
+            request = $http.put(
                 // /:userId/:playerId PUT
                 config.endpoint + '/' + $stateParams.userId + '/' + playerObject.id + '/updateplayer',
                 playerObject
@@ -315,6 +315,11 @@ module.exports = function(
                 utils.hideLoading($ionicLoading);
             });
         }
+
+        request.then(function(){
+            console.log("here")
+        })
+
     }
 
     //TODO remove duplicated code
@@ -324,9 +329,9 @@ module.exports = function(
         $scope.defensePlayers = 0;
         for(var i = 0; i < players.length; i++) {
             if( players[i].isSelected ) {
-                if( players[i].type === 'Offense' ) {
+                if( players[i].position === 'Offense' ) {
                     $scope.offensePlayers++;
-                } else if( players[i].type === 'Defense' ) {
+                } else if( players[i].position === 'Defense' ) {
                     $scope.defensePlayers++;
                 }
             }
@@ -380,7 +385,7 @@ var errorCheckingPlayer = function(player, players, $ionicPopup) {
       return -1;
     }
 
-    if( player.type !== 'Defense' && player.type !== 'Offense' ) {
+    if( player.position !== 'Defense' && player.position !== 'Offense' ) {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Player has to be either offense or defense'
@@ -464,7 +469,7 @@ module.exports = function(
     utils.showLoading("Deleting Game...", $ionicLoading);
     $http.delete(
       // /:userId/:gameId DEL
-      config.endpoint + '/' + $stateParams.userId + '/' + game.id
+      config.endpoint + '/' + $stateParams.userId + '/' + game.id + '/deletegame'
     ).then(function(res){
       var gameIndex = utils.findIndex($scope.games,game);
       if( gameIndex === -1 ) {
@@ -487,7 +492,7 @@ module.exports = function(
     utils.showLoading("Loading Game Info...", $ionicLoading);
     $http.get(
       // /:userId/:gameId GET
-      config.endpoint + '/' + $stateParams.userId + '/' + game.id
+      config.endpoint + '/' + $stateParams.userId + '/' + game.id + '/getgame'
     ).then(function(res){
       GamesManager.setCurrent(res.data.game);
       $state.go(
@@ -776,21 +781,10 @@ module.exports = function(
         }
     }
 
-    $scope.recalculatePlayerTypes = function() {
+    //make sure that our popover closes
+    $scope.$on('$ionicView.leave', function(){
         $scope.closePlayerListActions();
-        var players = $scope.players;
-        $scope.offensePlayers = 0;
-        $scope.defensePlayers = 0;
-        for(var i = 0; i < players.length; i++) {
-            if( players[i].isSelected ) {
-                if( players[i].type === 'Offense' ) {
-                    $scope.offensePlayers++;
-                } else if( players[i].type === 'Defense' ) {
-                    $scope.defensePlayers++;
-                }
-            }
-        }
-    }
+    });
 
     var deletePlayer = function(player) {
         var playerIndex = utils.findIndex($scope.players,player);

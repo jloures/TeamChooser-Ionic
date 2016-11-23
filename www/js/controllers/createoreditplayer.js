@@ -49,12 +49,13 @@ module.exports = function(
         }
         //verify pre-assign
         playerObject.team = playerObject.preassign ? playerObject.team : null;
+        var request;
         if( isNewPlayer ) {
             //make post to create player
             utils.showLoading("Creating Player...", $ionicLoading);
-            $http.post(
+            request = $http.post(
                 // /:userId/:gameId/createplayer POST returns id of player
-                config.endpoint + '/' + $stateParams.userId + '/createplayer',
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/createplayer',
                 playerObject
             ).then(function(res){
                 playerObject.id = res.data.id;
@@ -69,7 +70,7 @@ module.exports = function(
                 utils.hideLoading($ionicLoading);
             });
         } else {
-            $http.put(
+            request = $http.put(
                 // /:userId/:playerId PUT
                 config.endpoint + '/' + $stateParams.userId + '/' + playerObject.id + '/updateplayer',
                 playerObject
@@ -85,6 +86,29 @@ module.exports = function(
                 utils.hideLoading($ionicLoading);
             });
         }
+
+        request.then(function(){
+            $http.get(
+                // /:userId/:gameId GET
+                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/allplayers'
+                ).then(function(res){
+                    //set all game instances
+                    PlayersManager.set(res.data.allPlayers);
+                    $state.go(
+                        'playerslist', 
+                        {
+                            userId: $stateParams.userId,
+                            gameId: game.id
+                        }
+                    );
+                }, function(err){
+                    $ionicPopup.alert({
+                        title: 'Error',
+                        template: err.data
+                    });
+                });
+        });
+
     }
 
     //TODO remove duplicated code
@@ -94,9 +118,9 @@ module.exports = function(
         $scope.defensePlayers = 0;
         for(var i = 0; i < players.length; i++) {
             if( players[i].isSelected ) {
-                if( players[i].type === 'Offense' ) {
+                if( players[i].position === 'Offense' ) {
                     $scope.offensePlayers++;
-                } else if( players[i].type === 'Defense' ) {
+                } else if( players[i].position === 'Defense' ) {
                     $scope.defensePlayers++;
                 }
             }
@@ -150,7 +174,7 @@ var errorCheckingPlayer = function(player, players, $ionicPopup) {
       return -1;
     }
 
-    if( player.type !== 'Defense' && player.type !== 'Offense' ) {
+    if( player.position !== 'Defense' && player.position !== 'Offense' ) {
       $ionicPopup.alert({
         title: 'Error',
         template: 'Player has to be either offense or defense'

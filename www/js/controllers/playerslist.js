@@ -151,21 +151,10 @@ module.exports = function(
         }
     }
 
-    $scope.recalculatePlayerTypes = function() {
+    //make sure that our popover closes
+    $scope.$on('$ionicView.leave', function(){
         $scope.closePlayerListActions();
-        var players = $scope.players;
-        $scope.offensePlayers = 0;
-        $scope.defensePlayers = 0;
-        for(var i = 0; i < players.length; i++) {
-            if( players[i].isSelected ) {
-                if( players[i].type === 'Offense' ) {
-                    $scope.offensePlayers++;
-                } else if( players[i].type === 'Defense' ) {
-                    $scope.defensePlayers++;
-                }
-            }
-        }
-    }
+    });
 
     var deletePlayer = function(player) {
         var playerIndex = utils.findIndex($scope.players,player);

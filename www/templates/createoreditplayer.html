@@ -23,8 +23,8 @@
             <div class="item item-divider"> 
                 Type of Player
             </div>
-            <ion-radio name="playerTypeAssignment" ng-repeat="playerType in ['Offense', 'Defense']" ng-value="playerType" ng-model="currentPlayer.type">
-                {{playerType}}
+            <ion-radio name="playerTypeAssignment" ng-repeat="position in ['Offense', 'Defense']" ng-value="position" ng-model="currentPlayer.position">
+                {{position}}
             </ion-radio>
             <div class="item item-divider"> 
                 Player Team Assignment

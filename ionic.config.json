@@ -17,10 +17,25 @@
     "path": "/0/creategame",
     "proxyUrl": "http://localhost:4000/0/creategame"
   },{
-    "path": "/0/createplayer",
-    "proxyUrl": "http://localhost:4000/0/createplayer"
+    "path": "/0/duplicategame",
+    "proxyUrl": "http://localhost:4000/0/duplicategame"
   },{
     "path": "/0/0/allplayers",
     "proxyUrl": "http://localhost:4000/0/0/allplayers"
+  },{
+    "path": "/0/0/createplayer",
+    "proxyUrl": "http://localhost:4000/0/0/createplayer"
+  },{
+    "path": "/0/0/getgame",
+    "proxyUrl": "http://localhost:4000/0/0/getgame"
+  },{
+    "path": "/0/0/deletegame",
+    "proxyUrl": "http://localhost:4000/0/0/deletegame"
+  },{
+    "path": "/0/0/updategame",
+    "proxyUrl": "http://localhost:4000/0/0/updategame"
+  },{
+    "path": "/0/0/0/updateplayer",
+    "proxyUrl": "http://localhost:4000/0/0/0/updateplayer"
   }]
 }

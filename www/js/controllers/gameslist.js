@@ -59,7 +59,7 @@ module.exports = function(
     utils.showLoading("Deleting Game...", $ionicLoading);
     $http.delete(
       // /:userId/:gameId DEL
-      config.endpoint + '/' + $stateParams.userId + '/' + game.id
+      config.endpoint + '/' + $stateParams.userId + '/' + game.id + '/deletegame'
     ).then(function(res){
       var gameIndex = utils.findIndex($scope.games,game);
       if( gameIndex === -1 ) {
@@ -82,7 +82,7 @@ module.exports = function(
     utils.showLoading("Loading Game Info...", $ionicLoading);
     $http.get(
       // /:userId/:gameId GET
-      config.endpoint + '/' + $stateParams.userId + '/' + game.id
+      config.endpoint + '/' + $stateParams.userId + '/' + game.id + '/getgame'
     ).then(function(res){
       GamesManager.setCurrent(res.data.game);
       $state.go(

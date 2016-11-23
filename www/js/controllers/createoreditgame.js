@@ -15,7 +15,6 @@ module.exports = function(
 ) {
 
     $scope.currentGameInstance = utils.defaultGame();
-    console.log($scope.currentGameInstance);
     if( $stateParams.gameId != "-1" ) {
         $scope.currentGameInstance = GamesManager.getCurrent();
     }
@@ -42,7 +41,7 @@ module.exports = function(
     }
 
     $scope.duplicateGame = function() {
-        var newInstance = $scope.currentGameInstance;
+        var newInstance = utils.clone($scope.currentGameInstance);
         if( erroCheckingGame(newInstance, $ionicPopup, GamesManager.all()) < 0 ) {
             return;
         }
@@ -50,8 +49,8 @@ module.exports = function(
         utils.showLoading("Duplicating Game...", $ionicLoading);
         //will need to change this once you have the players too
         $http.post(
-            // /:userId/creategame POST returns id (gamesInstance.id)
-            config.endpoint + '/' + $stateParams.userId + '/creategame',
+            // /:userId/duplicategame POST returns id (gamesInstance.id)
+            config.endpoint + '/' + $stateParams.userId + '/duplicategame',
             newInstance
         ).then(function(res){
             newInstance.id = res.data.id;
@@ -99,7 +98,7 @@ module.exports = function(
             utils.showLoading("Updating Game...", $ionicLoading);
             $http.put(
                 // /:userId/:gameId PUT
-                config.endpoint + '/' + $stateParams.userId + '/' + gameInstance.id,
+                config.endpoint + '/' + $stateParams.userId + '/' + gameInstance.id + '/updategame',
                 gameInstance
             ).then(function(res){
                 GamesManager.edit(gameInstance);
