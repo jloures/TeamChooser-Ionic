@@ -58,7 +58,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
 
 },{}],2:[function(require,module,exports){
 module.exports = {
-    endpoint: ""
+    endpoint: "https://teammaker.herokuapp.com"
 }
 
 },{}],3:[function(require,module,exports){
@@ -87,8 +87,13 @@ module.exports = function(
     $ionicModal,
     $ionicListDelegate,
     $stateParams,
+    $ionicPlatform,
     GamesManager
 ) {
+
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
 
     $scope.currentGameInstance = utils.defaultGame();
     if( $stateParams.gameId != "-1" ) {
@@ -240,10 +245,15 @@ module.exports = function(
   $ionicModal,
   $ionicListDelegate,
   $stateParams,
+  $ionicPlatform,
   PlayersManager,
   GamesManager
 ) {
 
+
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     //controller variables
     $scope.gameInstance = GamesManager.get($stateParams.gameId);
     $scope.players = PlayersManager.all();
@@ -427,12 +437,16 @@ module.exports = function(
   $ionicPopover,
   $ionicLoading,
   $ionicModal,
+  $ionicPlatform,
   $ionicListDelegate,
   $stateParams,
   GamesManager,
   PlayersManager
 ) {
-  
+
+  $ionicPlatform.registerBackButtonAction(function (event) {
+          event.preventDefault();
+  }, 100);
   $scope.games = GamesManager.all();
   $scope.openPlayersList = function(game) {
     //make api call here to get all players in the game
@@ -526,8 +540,20 @@ module.exports = function(
 var config = require('../config.js');
 var utils = require('../utils.js');
 
-module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading, GamesManager) {
+module.exports = function(
+    $scope, 
+    $state, 
+    $ionicPopup, 
+    $http, 
+    $ionicLoading,
+    $ionicPlatform,
+    GamesManager
+) {
     
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
+
     $scope.goToSignUp = function() {
         $state.go('signup');
     }
@@ -587,7 +613,17 @@ var errorCheckingLogin = function(data) {
 },{"../config.js":2,"../utils.js":15}],8:[function(require,module,exports){
 var config = require('../config.js');
 
-module.exports = function($scope, $ionicPopup, $http, $state) {
+module.exports = function(
+    $scope,
+    $ionicPopup,
+    $http,
+    $state,
+    $ionicPlatform
+) {
+
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     $scope.recovery = {};
     $scope.returnToLoginPage = function() {
         $state.go('login');
@@ -649,10 +685,14 @@ module.exports = function(
   $ionicModal,
   $ionicListDelegate,
   $stateParams,
+  $ionicPlatform,
   PlayersManager,
   GamesManager
 ) {
 
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     $scope.players = PlayersManager.all();
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;
@@ -815,9 +855,18 @@ module.exports = function(
 var config = require('../config.js');
 var utils = require('../utils.js');
 
-module.exports = function($scope, $http, $state, $ionicPopup, $ionicLoading) {
+module.exports = function(
+    $scope, 
+    $http,
+    $state,
+    $ionicPopup,
+    $ionicLoading,
+    $ionicPlatform
+) {
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     $scope.signup = {};
-
     $scope.returnToLoginPage = function() {
         $state.go('login');
     }

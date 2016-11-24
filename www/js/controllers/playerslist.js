@@ -11,10 +11,14 @@ module.exports = function(
   $ionicModal,
   $ionicListDelegate,
   $stateParams,
+  $ionicPlatform,
   PlayersManager,
   GamesManager
 ) {
 
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     $scope.players = PlayersManager.all();
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;

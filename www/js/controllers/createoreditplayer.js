@@ -11,10 +11,15 @@ module.exports = function(
   $ionicModal,
   $ionicListDelegate,
   $stateParams,
+  $ionicPlatform,
   PlayersManager,
   GamesManager
 ) {
 
+
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     //controller variables
     $scope.gameInstance = GamesManager.get($stateParams.gameId);
     $scope.players = PlayersManager.all();

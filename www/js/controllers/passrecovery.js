@@ -1,6 +1,16 @@
 var config = require('../config.js');
 
-module.exports = function($scope, $ionicPopup, $http, $state) {
+module.exports = function(
+    $scope,
+    $ionicPopup,
+    $http,
+    $state,
+    $ionicPlatform
+) {
+
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     $scope.recovery = {};
     $scope.returnToLoginPage = function() {
         $state.go('login');

@@ -2,9 +2,18 @@
 var config = require('../config.js');
 var utils = require('../utils.js');
 
-module.exports = function($scope, $http, $state, $ionicPopup, $ionicLoading) {
+module.exports = function(
+    $scope, 
+    $http,
+    $state,
+    $ionicPopup,
+    $ionicLoading,
+    $ionicPlatform
+) {
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
     $scope.signup = {};
-
     $scope.returnToLoginPage = function() {
         $state.go('login');
     }

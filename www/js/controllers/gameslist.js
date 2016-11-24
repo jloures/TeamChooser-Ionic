@@ -9,12 +9,16 @@ module.exports = function(
   $ionicPopover,
   $ionicLoading,
   $ionicModal,
+  $ionicPlatform,
   $ionicListDelegate,
   $stateParams,
   GamesManager,
   PlayersManager
 ) {
-  
+
+  $ionicPlatform.registerBackButtonAction(function (event) {
+          event.preventDefault();
+  }, 100);
   $scope.games = GamesManager.all();
   $scope.openPlayersList = function(game) {
     //make api call here to get all players in the game

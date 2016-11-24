@@ -11,8 +11,13 @@ module.exports = function(
     $ionicModal,
     $ionicListDelegate,
     $stateParams,
+    $ionicPlatform,
     GamesManager
 ) {
+
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
 
     $scope.currentGameInstance = utils.defaultGame();
     if( $stateParams.gameId != "-1" ) {

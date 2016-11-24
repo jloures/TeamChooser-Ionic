@@ -2,8 +2,20 @@
 var config = require('../config.js');
 var utils = require('../utils.js');
 
-module.exports = function($scope, $state, $ionicPopup, $http, $ionicLoading, GamesManager) {
+module.exports = function(
+    $scope, 
+    $state, 
+    $ionicPopup, 
+    $http, 
+    $ionicLoading,
+    $ionicPlatform,
+    GamesManager
+) {
     
+    $ionicPlatform.registerBackButtonAction(function (event) {
+            event.preventDefault();
+    }, 100);
+
     $scope.goToSignUp = function() {
         $state.go('signup');
     }
