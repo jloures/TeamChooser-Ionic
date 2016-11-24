@@ -476,6 +476,10 @@ module.exports = function(
     });
   }
 
+  $scope.goToLogin = function() {
+    $state.go('login');
+  }
+
   $scope.goToCreateOrEditGame = function() {
     $state.go(
       'createoreditgame',
