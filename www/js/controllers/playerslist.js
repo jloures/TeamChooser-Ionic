@@ -19,8 +19,8 @@ module.exports = function(
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;
     $scope.selectedPlayers = 0;
-    $scope.defensePlayers = null;
-    $scope.offensePlayers = null;
+    $scope.defensePlayers = 0;
+    $scope.offensePlayers = 0;
 
     //register what the popover should contain ( what html page it should display )
     $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
@@ -87,7 +87,6 @@ module.exports = function(
 
     $scope.editPlayer = function(player) {
         //just go to createoreditplayer with a known player Id
-        $scope.closePlayerListActions();
         $state.go(
             'createoreditplayer',
             {
@@ -100,11 +99,10 @@ module.exports = function(
 
     $scope.deletePlayer = function(player) {
         //make api call here for deleting player
-        $scope.closePlayerListActions();
         utils.showLoading("Deleting Player...", $ionicLoading);
         $http.delete(
         // /:userId/:gameId/:playerId DEL
-        config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + player.id
+        config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + player.id + '/deleteplayer'
         ).then(function(res){
             deletePlayer(player);
         },function(err){
@@ -118,7 +116,6 @@ module.exports = function(
     }
 
     $scope.setIsSelectedBoolean = function(booleanValue) {
-        $scope.closePlayerListActions();
         var players = $scope.players;
         for( var i = 0; i < players.length; i++ ) {
             var player = players[i];
@@ -136,15 +133,14 @@ module.exports = function(
     }
 
     $scope.recalculatePlayerTypes = function() {
-        $scope.closePlayerListActions();
         var players = $scope.players;
         $scope.offensePlayers = 0;
         $scope.defensePlayers = 0;
         for(var i = 0; i < players.length; i++) {
             if( players[i].isSelected ) {
-                if( players[i].type === 'Offense' ) {
+                if( players[i].position === 'Offense' ) {
                     $scope.offensePlayers++;
-                } else if( players[i].type === 'Defense' ) {
+                } else if( players[i].position === 'Defense' ) {
                     $scope.defensePlayers++;
                 }
             }

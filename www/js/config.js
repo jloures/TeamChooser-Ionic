@@ -1,3 +1,3 @@
 module.exports = {
-    endpoint: ""
+    endpoint: "https://teammaker.herokuapp.com"
 }
