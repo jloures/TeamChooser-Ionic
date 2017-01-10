@@ -79,7 +79,6 @@ module.exports = function(
             return;
         }
 
-        gameInstance.hasBODRatings = gameInstance.hasSuperOptimizer && gameInstance.hasBODRatings;
         if( isNewGame ) {
             //make post to create game
             utils.showLoading("Creating Game...", $ionicLoading);

@@ -23,8 +23,6 @@ module.exports = function(
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;
     $scope.selectedPlayers = 0;
-    $scope.defensePlayers = 0;
-    $scope.offensePlayers = 0;
 
     //register what the popover should contain ( what html page it should display )
     $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
@@ -34,9 +32,15 @@ module.exports = function(
     });
 
     $scope.showTeamList = function() {
-        //will need to change this once assignment 
-        //gets proper
-        //MILESTONE 6
+        //check if you have more than 1 player selected
+        if( $scope.selectedPlayers < 2 ) {
+            $ionicPopup.alert({
+                title: 'Error',
+                template: 'More than 1 player needed to make teams'
+            });
+            return;
+        }
+        $scope.closePlayerListActions();
         $state.go(
             'teamlist', 
             { 
@@ -133,22 +137,6 @@ module.exports = function(
     $scope.toggleSelection = function(player) {
         player.isSelected = !player.isSelected;
         $scope.selectedPlayers += player.isSelected ? 1 : -1;
-        $scope.recalculatePlayerTypes();
-    }
-
-    $scope.recalculatePlayerTypes = function() {
-        var players = $scope.players;
-        $scope.offensePlayers = 0;
-        $scope.defensePlayers = 0;
-        for(var i = 0; i < players.length; i++) {
-            if( players[i].isSelected ) {
-                if( players[i].position === 'Offense' ) {
-                    $scope.offensePlayers++;
-                } else if( players[i].position === 'Defense' ) {
-                    $scope.defensePlayers++;
-                }
-            }
-        }
     }
 
     //make sure that our popover closes
@@ -171,7 +159,6 @@ module.exports = function(
         } else {
             $scope.lastPlayerAdded = null;
         }
-        $scope.recalculatePlayerTypes();
         $ionicListDelegate.closeOptionButtons();
     }
 }

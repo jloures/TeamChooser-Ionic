@@ -40,5 +40,8 @@
   },{
     "path": "/0/0/0/deleteplayer",
     "proxyUrl": "http://localhost:4000/0/0/0/deleteplayer"
+  },{
+    "path": "/0/0/match",
+    "proxyUrl": "http://localhost:4000/0/0/match"
   }]
 }

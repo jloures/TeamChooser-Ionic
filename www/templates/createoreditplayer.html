@@ -20,19 +20,6 @@
              <span class="input-label"><b>Player Rating (0-10)</b></span>
                 <input ng-model="currentPlayer.rating" type="text">
             </label>
-            <div class="item item-divider"> 
-                Type of Player
-            </div>
-            <ion-radio name="playerTypeAssignment" ng-repeat="position in ['Offense', 'Defense']" ng-value="position" ng-model="currentPlayer.position">
-                {{position}}
-            </ion-radio>
-            <div class="item item-divider"> 
-                Player Team Assignment
-            </div>
-            <ion-toggle ng-model="currentPlayer.preassign" toggle-class="toggle-calm"><b>Preassign player</b></ion-toggle>
-            <ion-radio name="playerTeam" ng-if="currentPlayer.preassign" ng-repeat="team in [gameInstance.teamA.name, gameInstance.teamB.name] track by $index" ng-value="team" ng-model="currentPlayer.team">
-                {{team}}
-            </ion-radio>
             <button class="button button-full button-positive" ng-click="createOrEditPlayer()">Save</button>
         </div>
     </ion-content>

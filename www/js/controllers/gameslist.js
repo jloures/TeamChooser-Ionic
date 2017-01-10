@@ -22,7 +22,7 @@ module.exports = function(
   $scope.games = GamesManager.all();
   $scope.openPlayersList = function(game) {
     //make api call here to get all players in the game
-    // start the loading page
+    //start the loading page
     utils.showLoading("Loading Players...", $ionicLoading);
     //API to get all games
     $http.get(
@@ -31,6 +31,7 @@ module.exports = function(
     ).then(function(res){
         //set all game instances
         PlayersManager.set(res.data.allPlayers);
+        GamesManager.setCurrent(game);
         $state.go(
           'playerslist', 
           {

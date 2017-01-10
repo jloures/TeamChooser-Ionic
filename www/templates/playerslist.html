@@ -9,19 +9,13 @@
     <ion-content class="has-footer">
         <div ng-if="selectedPlayers > 0">
             <div class="last-player-added">
-                {{selectedPlayers}} player(s) selected (D:{{defensePlayers}} O:{{offensePlayers}})
+                {{selectedPlayers}} player(s) selected
             </div>
         </div>
         <ion-list>          
             <ion-item ng-click="toggleSelection(player)" ng-repeat="player in players track by $index" >
                 <div class="player-item-players-list">
                     <b>{{player.name}}</b>
-                    <div class="player-attribute-players-list">
-                        {{player.position}}
-                        <div class="player-item-preassigned-team" ng-if="player.preassign !== undefined && player.preassign">
-                            &nbsp; | &nbsp; Preassign: {{player.team}}  
-                        </div>
-                    </div>
                 </div>
                 <ion-option-button class="button-positive" ng-click="editPlayer(player)">
                     Edit

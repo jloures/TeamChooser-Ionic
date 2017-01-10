@@ -168,22 +168,6 @@ var errorCheckingPlayer = function(player, players, $ionicPopup) {
       });
       return -1;
     }
-
-    if( player.position !== 'Defense' && player.position !== 'Offense' ) {
-      $ionicPopup.alert({
-        title: 'Error',
-        template: 'Player has to be either offense or defense'
-      });
-      return -1;
-    }
-
-    if( player.preassign !== undefined && player.preassign && ( player.team === null || player.team === undefined || player.team.trim() === "" )) {
-      $ionicPopup.alert({
-        title: 'Error',
-        template: 'Player preassign has been set, select a team!'
-      });
-      return -1;
-    }
 }
 
 

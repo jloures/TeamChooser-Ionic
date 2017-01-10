@@ -8,7 +8,7 @@
     </ion-header-bar>
     <ion-content>
         <ion-list>          
-            <ion-item ng-click="openPlayersList(game)" ng-repeat="game in games track by $index" >
+            <ion-item class="game-item-games-list" ng-click="openPlayersList(game)" ng-repeat="game in games track by $index" >
                 {{game.gameName}}
                 <ion-option-button class="button-positive" ng-click="editGame(game)">
                     Edit
