@@ -58,7 +58,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
 
 },{}],2:[function(require,module,exports){
 module.exports = {
-    endpoint: ""//https://teammaker.herokuapp.com"
+    endpoint: "https://teammaker.herokuapp.com"
 }
 },{}],3:[function(require,module,exports){
 angular.module('ionicApp.controllers', [])
