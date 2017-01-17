@@ -34,12 +34,16 @@ module.exports = function(
     //assign players to teams
     $scope.currentGameInstance.teamA.players = [];
     $scope.currentGameInstance.teamB.players = [];
-    var teamA = $scope.currentGameInstance.teamA.players;
-    teamA.sum = 0;
-    var teamB = $scope.currentGameInstance.teamB.players;
-    teamB.sum = 0;
+    var teamA = {
+      players: $scope.currentGameInstance.teamA.players,
+      sum: 0
+    };
+    var teamB = {
+      players: $scope.currentGameInstance.teamB.players,
+      sum: 0
+    };
 
-    teamA.push(players[0]);
+    teamA.players.push(players[0]);
     for(var i = 1; i < players.length; i++) {
       addPlayer(teamB,i,players);
       i++;
@@ -48,13 +52,12 @@ module.exports = function(
       addPlayer(teamA,i,players);
       i++;
       addPlayer(teamA,i,players);
-      i++;
     }
     if(middlePlayer != null) {
-      if( teamA.sum > teamB.sum ) {
-        teamB.push(middlePlayer);
+      if( teamA.sum/teamA.players.length > teamB.sum/teamB.players.length ) {
+        teamB.players.push(middlePlayer);
       } else {
-        teamA.push(middlePlayer);
+        teamA.players.push(middlePlayer);
       }
     }
   }
@@ -123,6 +126,6 @@ var addPlayer = function(team,index,players) {
   if(players[index] == undefined) {
     return;
   }
-  team.push(players[index]);
+  team.players.push(players[index]);
   team.sum += parseFloat(players[index].rating);
 }

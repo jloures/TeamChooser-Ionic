@@ -963,6 +963,7 @@ module.exports = function(
     };
 
     teamA.players.push(players[0]);
+    debugger;
     for(var i = 1; i < players.length; i++) {
       addPlayer(teamB,i,players);
       i++;
