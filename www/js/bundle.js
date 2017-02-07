@@ -58,7 +58,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
 
 },{}],2:[function(require,module,exports){
 module.exports = {
-    endpoint: "http://54.166.152.230:80"
+    endpoint: "http://54.166.25.106:80"
 }
 },{}],3:[function(require,module,exports){
 angular.module('ionicApp.controllers', [])
@@ -979,6 +979,9 @@ module.exports = function(
         teamA.players.push(middlePlayer);
       }
     }
+
+
+
   }
 
   $scope.saveScore = function() {
@@ -1002,19 +1005,18 @@ module.exports = function(
     //valid scores were entered
     //make api call
     utils.showLoading("Saving Scores...", $ionicLoading);
-    var data = [];
+    var data = {};
     var teamA = $scope.currentGameInstance.teamA.players;
     var teamB = $scope.currentGameInstance.teamB.players;
-    for(var j = 0; j < teamA.length; j++) {
-      var player = teamA[j];
-      player.score = this.scoreA;
-      data.push(player);
-    }
-    for(var k = 0; k < teamB.length; k++) {
-      var player = teamB[k];
-      player.score = this.scoreB;
-      data.push(player);
-    }
+    data.teamA = {
+      players: teamA,
+      score: this.scoreA
+    };
+    data.teamB = {
+      players: teamB,
+      score: this.scoreB
+    };
+
     $http.post(
         config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/match',
         data
