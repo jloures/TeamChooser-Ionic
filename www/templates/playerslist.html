@@ -15,7 +15,10 @@
         <ion-list>          
             <ion-item ng-click="toggleSelection(player)" ng-repeat="player in players track by $index" >
                 <div class="player-item-players-list">
-                    <b>{{player.name}}</b>
+                    <span>
+                        <b>{{player.name}}</b>
+                        <div ng-if="player.newRating !== undefined">Change in Rating: {{player.ratingDifference}}</div>
+                    </span>
                 </div>
                 <ion-option-button class="button-positive" ng-click="editPlayer(player)">
                     Edit

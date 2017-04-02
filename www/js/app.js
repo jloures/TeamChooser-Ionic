@@ -16,7 +16,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     controller: 'GamesList'
   })
   .state('playerslist', {
-    url: '/:userId/gameslist/:gameId/playerslist',
+    url: '/:userId/gameslist/:gameId/playerslist/:updateRating',
     cache: false,
     templateUrl: 'templates/playerslist.html',
     controller: 'PlayersList'

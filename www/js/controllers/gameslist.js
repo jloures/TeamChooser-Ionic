@@ -36,7 +36,8 @@ module.exports = function(
           'playerslist', 
           {
             userId: $stateParams.userId,
-            gameId: game.id
+            gameId: game.id,
+            updateRating: false
           }
         );
     }, function(err){

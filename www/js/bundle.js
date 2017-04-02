@@ -17,7 +17,7 @@ angular.module('ionicApp', ['ionic', 'ionicApp.controllers', 'ionicApp.services'
     controller: 'GamesList'
   })
   .state('playerslist', {
-    url: '/:userId/gameslist/:gameId/playerslist',
+    url: '/:userId/gameslist/:gameId/playerslist/:updateRating',
     cache: false,
     templateUrl: 'templates/playerslist.html',
     controller: 'PlayersList'
@@ -306,7 +306,7 @@ module.exports = function(
         } else {
             request = $http.put(
                 // /:userId/:playerId PUT
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id + '/updateplayer',
+                config.endpoint + '/' + $stateParams.userId + '/' + playerObject.id + '/updateplayer',
                 playerObject
             ).then(function(res){
                 PlayersManager.edit(playerObject);
@@ -446,7 +446,8 @@ module.exports = function(
           'playerslist', 
           {
             userId: $stateParams.userId,
-            gameId: game.id
+            gameId: game.id,
+            updateRating: false
           }
         );
     }, function(err){
@@ -684,6 +685,7 @@ module.exports = function(
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;
     $scope.selectedPlayers = 0;
+    $scope.updateRating = $stateParams.updateRating == true;
 
     //register what the popover should contain ( what html page it should display )
     $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
@@ -766,6 +768,69 @@ module.exports = function(
         )
     }
 
+    $scope.updateRatings = function() {
+        $scope.closePlayerListActions();
+        utils.showLoading("Updating Ratings...", $ionicLoading);
+        var updatePlayers = $scope.players.filter(function(player){
+            return player.isSelected;
+        }).map(function(player){
+            player.rating = player.newRating;
+            return player;
+        });
+
+        if( updatePlayers.length === 0 ) {
+            utils.hideLoading($ionicLoading);
+            $scope.refresh();  
+        }
+
+        setAllPlayersSelectState(false);
+
+        $http.put(
+            config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/updateallplayers',
+            {
+                allPlayers: updatePlayers
+            }       
+        ).then(function(res){
+            $scope.refresh();
+        }, function(err){
+            $ionicPopup.alert({
+                title: 'Error',
+                template: err.data
+            });
+        }).finally(function(){
+            utils.hideLoading($ionicLoading);
+        });
+    }
+
+    $scope.refresh = function() {
+        //make api call here to get all players in the game
+        //start the loading page
+        utils.showLoading("Loading Players...", $ionicLoading);
+        //API to get all games
+        $http.get(
+            // :userId/:gameId/allplayers GET
+            config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/allplayers'
+        ).then(function(res){
+            //set all game instances
+            PlayersManager.set(res.data.allPlayers);
+            $state.go(
+                'playerslist', 
+                {
+                    userId: $stateParams.userId,
+                    gameId: $stateParams.gameId,
+                    updateRating: false
+                }
+            );
+        }, function(err){
+            $ionicPopup.alert({
+                title: 'Error',
+                template: err.data
+            });
+        }).finally(function(){
+            utils.hideLoading($ionicLoading);
+        });   
+    }
+
     $scope.deletePlayer = function(player) {
         //make api call here for deleting player
         utils.showLoading("Deleting Player...", $ionicLoading);
@@ -794,6 +859,8 @@ module.exports = function(
         }
         $scope.playerlistactions.hide();
     }
+
+    $scope.setIsSelectedBoolean(false);
 
     $scope.toggleSelection = function(player) {
         player.isSelected = !player.isSelected;
@@ -1021,7 +1088,25 @@ module.exports = function(
         config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/match',
         data
     ).then(function(res){
-        $state.go('gameslist', {userId: $stateParams.userId});
+        var oldPlayers = PlayersManager.all();
+        var newPlayers = res.data;
+        newPlayers.forEach(function(player){
+          oldPlayers.forEach(function(oldPlayer){
+            if( player.playerId == oldPlayer.playerId ) {
+              oldPlayer.newRating = parseFloat(player.rating.toFixed(2));
+              var difference = (oldPlayer.newRating - oldPlayer.rating);
+              oldPlayer.ratingDifference = parseFloat(difference.toFixed(2));
+            }
+          });
+        });
+        $state.go(
+          'playerslist', 
+          {
+            userId: $stateParams.userId,
+            gameId: $stateParams.gameId,
+            updateRating: true
+          }
+        );
     }, function(err){
         $ionicPopup.alert({
             title: 'Error',
@@ -1036,6 +1121,15 @@ module.exports = function(
     $state.go('gameslist', {userId: $stateParams.userId});
   }
   makeTeams();
+
+  $scope.averageA = $scope.currentGameInstance.teamA.players.reduce(function(acc, val) {
+    return acc + val;
+  }, 0)/$scope.currentGameInstance.teamA.players.length;
+
+  $scope.averageB = $scope.currentGameInstance.teamB.players.reduce(function(acc, val) {
+    return acc + val;
+  }, 0)/$scope.currentGameInstance.teamB.players.length;
+
 }
 
 var parseRating = function(possibleNumber) {
@@ -1194,4 +1288,4 @@ module.exports = {
         return this.clone({teamA:{name:"Light"},teamB:{name:"Dark"}});
     }
 };
-},{}]},{},[3,12,1]);
+},{}]},{},[3,1,12]);

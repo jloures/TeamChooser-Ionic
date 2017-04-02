@@ -102,7 +102,25 @@ module.exports = function(
         config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/match',
         data
     ).then(function(res){
-        $state.go('gameslist', {userId: $stateParams.userId});
+        var oldPlayers = PlayersManager.all();
+        var newPlayers = res.data;
+        newPlayers.forEach(function(player){
+          oldPlayers.forEach(function(oldPlayer){
+            if( player.playerId == oldPlayer.playerId ) {
+              oldPlayer.newRating = parseFloat(player.rating.toFixed(2));
+              var difference = (oldPlayer.newRating - oldPlayer.rating);
+              oldPlayer.ratingDifference = parseFloat(difference.toFixed(2));
+            }
+          });
+        });
+        $state.go(
+          'playerslist', 
+          {
+            userId: $stateParams.userId,
+            gameId: $stateParams.gameId,
+            updateRating: true
+          }
+        );
     }, function(err){
         $ionicPopup.alert({
             title: 'Error',
@@ -117,6 +135,15 @@ module.exports = function(
     $state.go('gameslist', {userId: $stateParams.userId});
   }
   makeTeams();
+
+  $scope.averageA = $scope.currentGameInstance.teamA.players.reduce(function(acc, val) {
+    return acc + val;
+  }, 0)/$scope.currentGameInstance.teamA.players.length;
+
+  $scope.averageB = $scope.currentGameInstance.teamB.players.reduce(function(acc, val) {
+    return acc + val;
+  }, 0)/$scope.currentGameInstance.teamB.players.length;
+
 }
 
 var parseRating = function(possibleNumber) {

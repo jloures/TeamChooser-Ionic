@@ -74,7 +74,7 @@ module.exports = function(
         } else {
             request = $http.put(
                 // /:userId/:playerId PUT
-                config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/' + playerObject.id + '/updateplayer',
+                config.endpoint + '/' + $stateParams.userId + '/' + playerObject.id + '/updateplayer',
                 playerObject
             ).then(function(res){
                 PlayersManager.edit(playerObject);
