@@ -23,7 +23,16 @@ module.exports = function(
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;
     $scope.selectedPlayers = 0;
-    $scope.updateRating = $stateParams.updateRating == true;
+    $scope.updateRating = $stateParams.updateRating == 'true';
+    var setAllPlayersSelectState = function(state) {
+        var players = $scope.players;
+        for( var i = 0; i < players.length; i++ ) {
+            var player = players[i];
+            player.isSelected = false;
+        }
+    }
+
+    setAllPlayersSelectState(false);
 
     //register what the popover should contain ( what html page it should display )
     $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
@@ -108,20 +117,19 @@ module.exports = function(
 
     $scope.updateRatings = function() {
         $scope.closePlayerListActions();
-        utils.showLoading("Updating Ratings...", $ionicLoading);
         var updatePlayers = $scope.players.filter(function(player){
-            return player.isSelected;
-        }).map(function(player){
-            player.rating = player.newRating;
-            return player;
+            return player.isSelected && player.newRating !== undefined;
         });
 
         if( updatePlayers.length === 0 ) {
-            utils.hideLoading($ionicLoading);
             $scope.refresh();  
         }
+        utils.showLoading("Updating Ratings...", $ionicLoading);
 
-        setAllPlayersSelectState(false);
+        updatePlayers = updatePlayers.map(function(player){
+            player.rating = player.newRating;
+            return player;
+        });
 
         $http.put(
             config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/updateallplayers',
@@ -197,8 +205,6 @@ module.exports = function(
         }
         $scope.playerlistactions.hide();
     }
-
-    $scope.setIsSelectedBoolean(false);
 
     $scope.toggleSelection = function(player) {
         player.isSelected = !player.isSelected;

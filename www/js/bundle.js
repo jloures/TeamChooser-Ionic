@@ -685,7 +685,16 @@ module.exports = function(
     $scope.gameName = GamesManager.get($stateParams.gameId).gameName;
     $scope.lastPlayerAdded = null;
     $scope.selectedPlayers = 0;
-    $scope.updateRating = $stateParams.updateRating == true;
+    $scope.updateRating = $stateParams.updateRating == 'true';
+    var setAllPlayersSelectState = function(state) {
+        var players = $scope.players;
+        for( var i = 0; i < players.length; i++ ) {
+            var player = players[i];
+            player.isSelected = false;
+        }
+    }
+
+    setAllPlayersSelectState(false);
 
     //register what the popover should contain ( what html page it should display )
     $ionicPopover.fromTemplateUrl('templates/playerlistactions.html', {
@@ -770,20 +779,19 @@ module.exports = function(
 
     $scope.updateRatings = function() {
         $scope.closePlayerListActions();
-        utils.showLoading("Updating Ratings...", $ionicLoading);
         var updatePlayers = $scope.players.filter(function(player){
-            return player.isSelected;
-        }).map(function(player){
-            player.rating = player.newRating;
-            return player;
+            return player.isSelected && player.newRating !== undefined;
         });
 
         if( updatePlayers.length === 0 ) {
-            utils.hideLoading($ionicLoading);
             $scope.refresh();  
         }
+        utils.showLoading("Updating Ratings...", $ionicLoading);
 
-        setAllPlayersSelectState(false);
+        updatePlayers = updatePlayers.map(function(player){
+            player.rating = player.newRating;
+            return player;
+        });
 
         $http.put(
             config.endpoint + '/' + $stateParams.userId + '/' + $stateParams.gameId + '/updateallplayers',
@@ -859,8 +867,6 @@ module.exports = function(
         }
         $scope.playerlistactions.hide();
     }
-
-    $scope.setIsSelectedBoolean(false);
 
     $scope.toggleSelection = function(player) {
         player.isSelected = !player.isSelected;
@@ -1012,6 +1018,16 @@ module.exports = function(
     players.sort(function(a,b){
       return parseFloat(b.rating) - parseFloat(a.rating);
     })
+
+    var log = players.map(function(player){
+      return {
+        player: player,
+        rating: player.rating
+      }
+    });
+
+    console.log(JSON.stringify(log))
+
     if( (players.length % 2) === 1 ) {
       var playerIndex = players.length/2 - 0.5
       middlePlayer = players[playerIndex];
@@ -1122,19 +1138,19 @@ module.exports = function(
   }
   makeTeams();
 
-  $scope.averageA = $scope.currentGameInstance.teamA.players.reduce(function(acc, val) {
-    return acc + val;
-  }, 0)/$scope.currentGameInstance.teamA.players.length;
+  $scope.averageA = ($scope.currentGameInstance.teamA.players.reduce(function(acc, val) {
+    return acc + val.rating;
+  }, 0)/$scope.currentGameInstance.teamA.players.length).toFixed(2);
 
-  $scope.averageB = $scope.currentGameInstance.teamB.players.reduce(function(acc, val) {
-    return acc + val;
-  }, 0)/$scope.currentGameInstance.teamB.players.length;
+  $scope.averageB = ($scope.currentGameInstance.teamB.players.reduce(function(acc, val) {
+    return acc + val.rating;
+  }, 0)/$scope.currentGameInstance.teamB.players.length).toFixed(2);
 
 }
 
 var parseRating = function(possibleNumber) {
     var floatVar = parseFloat(possibleNumber);
-    return !isNaN(possibleNumber) && floatVar >= 0 && floatVar <=10 ? floatVar.toFixed(2) : null;
+    return !isNaN(possibleNumber) && floatVar >= 0 ? floatVar.toFixed(2) : null;
 }
 
 var addPlayer = function(team,index,players) {
@@ -1288,4 +1304,4 @@ module.exports = {
         return this.clone({teamA:{name:"Light"},teamB:{name:"Dark"}});
     }
 };
-},{}]},{},[3,1,12]);
+},{}]},{},[3,12,1]);
